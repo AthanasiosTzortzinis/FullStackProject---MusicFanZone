@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const playlistRoutes = require('./routes/playlistRoutes');
 const trackRoutes = require('./routes/trackRoutes');
 const spotifyRoutes = require('./routes/spotifyRoutes');
+const commentsRoutes = require('./routes/commentsRoutes');
 const fs = require('fs');
 const path = require('path');
 
@@ -24,6 +25,7 @@ app.get('/', (req, res) => {
   res.send('Welcome to the MusicFanZone');
 });
 
+app.use('/comments', commentsRoutes);
 app.use('/playlists', playlistRoutes);
 app.use('/tracks', trackRoutes);
 app.use('/spotify', spotifyRoutes); 

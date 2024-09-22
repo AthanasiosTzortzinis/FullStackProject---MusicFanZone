@@ -1,13 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const spotifyService = require('../Services/spotifyService');
+const { TokenExpiredError } = require('jsonwebtoken');
 
 router.get('/callback', async (req, res) => {
   const code = req.query.code;
 
   if (code) {
     try {
-      const { accessToken, refreshToken } = await spotifyService.handleCallback(code);
+      const { accessToken, refreshToken, expiresIn } = await spotifyService.handleCallback(code);
+      spotifyService.saveTokens({accessToken, refreshToken, tokenExpiry:Date.now()+expiresIn*1000})
      
       res.json({ accessToken, refreshToken }); 
     } catch (error) {
