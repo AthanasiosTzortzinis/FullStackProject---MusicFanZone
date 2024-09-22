@@ -16,12 +16,14 @@ let tokenExpiry = 0;
 const loadTokens = () => {
   if (fs.existsSync(TOKEN_FILE_PATH)) {
     const data = fs.readFileSync(TOKEN_FILE_PATH);
+    console.log('data',JSON.parse(data));
     return JSON.parse(data);
   }
   return {};
 };
 
 const saveTokens = (tokenData) => {
+  console.log('tokenData',tokenData);
   fs.writeFileSync(TOKEN_FILE_PATH, JSON.stringify(tokenData, null, 2));
 };
 
@@ -36,9 +38,9 @@ async function handleCallback(code) {
     const tokenResponse = await axios.post('https://accounts.spotify.com/api/token', querystring.stringify({
       grant_type: 'authorization_code',
       code: code,
-      redirect_uri: SPOTIFY_REDIRECT_URI,
-      client_id: SPOTIFY_CLIENT_ID,
-      client_secret: SPOTIFY_CLIENT_SECRET
+      redirect_uri: process.env.SPOTIFY_REDIRECT_URI,
+      client_id: process.env.SPOTIFY_CLIENT_ID,
+      client_secret: process.env.SPOTIFY_CLIENT_SECRET
     }), {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -53,6 +55,7 @@ async function handleCallback(code) {
 
     return { accessToken, refreshToken };
   } catch (error) {
+    console.log(error.response);
     throw new Error('Failed to exchange authorization code for tokens');
   }
 }
@@ -70,7 +73,7 @@ async function refreshAccessToken() {
     }), {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64')}`
+        'Authorization': `Basic ${Buffer.from(`${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`).toString('base64')}`
       }
     });
 
