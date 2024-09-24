@@ -29,6 +29,7 @@ app.use('/comments', commentsRoutes);
 app.use('/playlists', playlistRoutes);
 app.use('/tracks', trackRoutes);
 app.use('/spotify', spotifyRoutes); 
+app.use("/user",require("./routes/user"))
 
 const TOKEN_FILE_PATH = path.join('../tokens.json');
 
