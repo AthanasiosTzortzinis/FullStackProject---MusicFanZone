@@ -9,9 +9,8 @@ function Playlists() {
   const [trackName, setTrackName] = useState('');
   const [selectedPlaylistId, setSelectedPlaylistId] = useState('');
 
-  const API_URL = 'http://localhost:4000'; // Ensure this matches your backend URL
+  const API_URL = 'http://localhost:4000'; 
 
-  // Fetch playlists from the backend when the component mounts
   useEffect(() => {
     const fetchPlaylists = async () => {
       try {
@@ -24,7 +23,6 @@ function Playlists() {
     fetchPlaylists();
   }, []);
 
-  // Add a new playlist
   const addPlaylist = async (e) => {
     e.preventDefault();
     if (playlistName.trim() !== '') {
@@ -39,23 +37,23 @@ function Playlists() {
     }
   };
 
-  // Delete a playlist
+
   const deletePlaylist = async (id) => {
     try {
       await axios.delete(`${API_URL}/playlists/${id}`);
-      setPlaylists(playlists.filter(playlist => playlist._id !== id)); // Match against _id
+      setPlaylists(playlists.filter(playlist => playlist._id !== id)); 
     } catch (error) {
       console.error("Error deleting playlist:", error.response ? error.response.data : error.message);
     }
   };
 
-  // Start editing a playlist
+  
   const startEditPlaylist = (id, name) => {
     setEditPlaylistId(id);
     setEditPlaylistName(name);
   };
 
-  // Submit playlist edit
+  
   const editPlaylist = async (e) => {
     e.preventDefault();
     try {
@@ -71,14 +69,14 @@ function Playlists() {
     }
   };
 
-  // Add a track to a specific playlist
+  
   const addTrackToPlaylist = async () => {
     if (trackName.trim() !== '' && selectedPlaylistId) {
       try {
-        const updatedTrack = { name: trackName }; // Ensure the property matches your backend model
+        const updatedTrack = { name: trackName }; 
         await axios.post(`${API_URL}/playlists/${selectedPlaylistId}/tracks`, updatedTrack);
         
-        // Update the playlists state
+        
         setPlaylists(playlists.map(playlist => {
           if (playlist._id === selectedPlaylistId) {
             return { ...playlist, tracks: [...playlist.tracks, trackName] };
