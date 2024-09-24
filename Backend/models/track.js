@@ -20,7 +20,8 @@ const trackSchema = new mongoose.Schema({
   spotifyId: {
     type: String,  
     required: true
-  }
+  },
+  owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 });
 
 const Track = mongoose.model('Track', trackSchema);
