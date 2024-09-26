@@ -8,8 +8,11 @@ function Playlists() {
   const [editPlaylistName, setEditPlaylistName] = useState('');
   const [trackName, setTrackName] = useState('');
   const [selectedPlaylistId, setSelectedPlaylistId] = useState('');
+  const [editingTrackId, setEditingTrackId] = useState(null);
+  const [editTrackName, setEditTrackName] = useState('');
 
-  const API_URL = 'http://localhost:4000'; 
+  const API_URL = 'http://localhost:4000';
+  const SPOTIFY_API_URL = 'https://api.spotify.com/v1/search'; 
 
   useEffect(() => {
     const fetchPlaylists = async () => {
@@ -37,23 +40,20 @@ function Playlists() {
     }
   };
 
-
   const deletePlaylist = async (id) => {
     try {
       await axios.delete(`${API_URL}/playlists/${id}`);
-      setPlaylists(playlists.filter(playlist => playlist._id !== id)); 
+      setPlaylists(playlists.filter(playlist => playlist._id !== id));
     } catch (error) {
       console.error("Error deleting playlist:", error.response ? error.response.data : error.message);
     }
   };
 
-  
   const startEditPlaylist = (id, name) => {
     setEditPlaylistId(id);
     setEditPlaylistName(name);
   };
 
-  
   const editPlaylist = async (e) => {
     e.preventDefault();
     try {
@@ -69,24 +69,117 @@ function Playlists() {
     }
   };
 
-  
+  // Add a track to a playlist
   const addTrackToPlaylist = async () => {
     if (trackName.trim() !== '' && selectedPlaylistId) {
-      try {
-        const updatedTrack = { name: trackName }; 
-        await axios.post(`${API_URL}/playlists/${selectedPlaylistId}/tracks`, updatedTrack);
-        
-        
-        setPlaylists(playlists.map(playlist => {
-          if (playlist._id === selectedPlaylistId) {
-            return { ...playlist, tracks: [...playlist.tracks, trackName] };
-          }
-          return playlist;
-        }));
-        setTrackName('');
-      } catch (error) {
-        console.error("Error adding track:", error.response ? error.response.data : error.message);
-      }
+        try {
+            const accessToken = await getAccessToken();
+            console.log("Access Token:", accessToken);
+            
+            
+            const response = await axios.get(SPOTIFY_API_URL, {
+                params: {
+                    q: trackName,
+                    type: 'track',
+                    limit: 1
+                },
+                headers: {
+                    Authorization: `Bearer ${accessToken}`
+                }
+            });
+            
+            // Log 
+            console.log("Spotify Response:", response.data);
+
+            const trackData = response.data.tracks.items[0]; 
+            if (!trackData) {
+                console.error("No track found.");
+                return;
+            }
+            console.log("Track Data:", trackData);
+
+            const newTrack = {
+                title: trackData.name,
+                artist: trackData.artists[0].name, 
+                album: trackData.album.name,
+                duration: trackData.duration_ms,
+                spotifyId: trackData.id
+            };
+
+            const trackResponse = await axios.post(`${API_URL}/tracks`, newTrack);
+            console.log("Track Response:", trackResponse.data);
+
+            await axios.post(`${API_URL}/playlists/${selectedPlaylistId}/tracks`, { trackId: trackResponse.data._id });
+            
+            // Update the playlists state
+            setPlaylists(playlists.map(playlist => {
+                if (playlist._id === selectedPlaylistId) {
+                    return { ...playlist, tracks: [...playlist.tracks, trackResponse.data] };
+                }
+                return playlist;
+            }));
+
+            setTrackName('');
+        } catch (error) {
+            console.error("Error adding track:", error.response ? error.response.data : error.message);
+        }
+    }
+};
+
+
+  const deleteTrackFromPlaylist = async (playlistId, trackId) => {
+    try {
+      await axios.delete(`${API_URL}/tracks/${trackId}`);
+      setPlaylists(playlists.map(playlist => {
+        if (playlist._id === playlistId) {
+          return { ...playlist, tracks: playlist.tracks.filter(track => track._id !== trackId) };
+        }
+        return playlist;
+      }));
+    } catch (error) {
+      console.error("Error deleting track:", error.response ? error.response.data : error.message);
+    }
+  };
+
+  const startEditTrack = (trackId, currentTrackName) => {
+    setEditingTrackId(trackId);
+    setEditTrackName(currentTrackName);
+  };
+
+  const editTrack = async (playlistId, e) => {
+    e.preventDefault();
+    try {
+      const updatedTrack = { title: editTrackName }; 
+      await axios.put(`${API_URL}/tracks/${editingTrackId}`, updatedTrack);
+
+      setPlaylists(playlists.map(playlist => {
+        if (playlist._id === playlistId) {
+          return {
+            ...playlist,
+            tracks: playlist.tracks.map(track => 
+              track._id === editingTrackId ? { ...track, title: editTrackName } : track
+            )
+          };
+        }
+        return playlist;
+      }));
+
+      setEditingTrackId(null);
+      setEditTrackName('');
+    } catch (error) {
+      console.error("Error editing track:", error.response ? error.response.data : error.message);
+    }
+  };
+
+
+  const getAccessToken = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/get-token`); 
+      
+      return response.data.accessToken; 
+    } catch (error) {
+      console.error("Error fetching access token:", error.response ? error.response.data : error.message);
+      return null;
     }
   };
 
@@ -128,11 +221,31 @@ function Playlists() {
                 <button onClick={() => startEditPlaylist(playlist._id, playlist.name)}>Edit</button>
               </>
             )}
+
             {/* List of Tracks */}
             {playlist.tracks.length > 0 && (
               <ul>
-                {playlist.tracks.map((track, index) => (
-                  <li key={index}>{track}</li>
+                {playlist.tracks.map(track => (
+                  <li key={track._id}>
+                    {editingTrackId === track._id ? (
+                      <form onSubmit={(e) => editTrack(playlist._id, e)}>
+                        <input
+                          type="text"
+                          value={editTrackName}
+                          onChange={(e) => setEditTrackName(e.target.value)}
+                          required
+                        />
+                        <button type="submit">Update</button>
+                        <button type="button" onClick={() => setEditingTrackId(null)}>Cancel</button>
+                      </form>
+                    ) : (
+                      <>
+                        {track.title} by {track.artist}
+                        <button onClick={() => startEditTrack(track._id, track.title)}>Edit</button>
+                        <button onClick={() => deleteTrackFromPlaylist(playlist._id, track._id)}>Delete</button>
+                      </>
+                    )}
+                  </li>
                 ))}
               </ul>
             )}
@@ -140,7 +253,7 @@ function Playlists() {
         ))}
       </ul>
 
-      {/* Add/Edit/Delete Tracks Section */}
+      {/* Add Track to Playlist */}
       {playlists.length > 0 && (
         <div>
           <h3>Manage Tracks</h3>
@@ -155,6 +268,7 @@ function Playlists() {
             value={trackName}
             onChange={(e) => setTrackName(e.target.value)}
             placeholder="Track Name"
+            required
           />
           <button onClick={addTrackToPlaylist}>Add Track</button>
         </div>

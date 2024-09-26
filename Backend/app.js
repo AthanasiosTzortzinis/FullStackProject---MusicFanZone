@@ -8,6 +8,7 @@ const spotifyRoutes = require('./routes/spotifyRoutes');
 const commentsRoutes = require('./routes/commentsRoutes');
 const fs = require('fs');
 const path = require('path');
+const tokenRoutes = require('./routes/token'); 
 
 dotenv.config(); 
 
@@ -30,6 +31,7 @@ app.use('/playlists', playlistRoutes);
 app.use('/tracks', trackRoutes);
 app.use('/spotify', spotifyRoutes); 
 app.use("/user",require("./routes/user"))
+app.use('/', tokenRoutes);
 
 const TOKEN_FILE_PATH = path.join('../tokens.json');
 

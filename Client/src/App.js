@@ -4,7 +4,7 @@ import Playlists from './Components/Playlists';
 function App() {
   return (
     <div>
-      <h1>Music Playlist Manager</h1>
+      <h1>Music Fan Zone</h1>
       {/* Render the Playlists component */}
       <Playlists />
     </div>
