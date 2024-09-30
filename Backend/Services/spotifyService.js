@@ -1,7 +1,7 @@
-const axios = require('axios');
-const querystring = require('querystring');
-const fs = require('fs');
-const path = require('path');
+const axios = require('axios'); // Import axios for HTTP requests
+const querystring = require('querystring'); 
+const fs = require('fs'); 
+const path = require('path'); 
 
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
@@ -16,14 +16,14 @@ let tokenExpiry = 0;
 const loadTokens = () => {
   if (fs.existsSync(TOKEN_FILE_PATH)) {
     const data = fs.readFileSync(TOKEN_FILE_PATH);
-    console.log('data',JSON.parse(data));
+    console.log('Loaded tokens:', JSON.parse(data));
     return JSON.parse(data);
   }
   return {};
 };
 
 const saveTokens = (tokenData) => {
-  console.log('tokenData',tokenData);
+  console.log('Saving token data:', tokenData);
   fs.writeFileSync(TOKEN_FILE_PATH, JSON.stringify(tokenData, null, 2));
 };
 
@@ -32,35 +32,44 @@ accessToken = tokens.accessToken || '';
 refreshToken = tokens.refreshToken || '';
 tokenExpiry = tokens.tokenExpiry || 0;
 
-// Handles Spotify callback and exchanges the authorization code for access and refresh tokens
+
 async function handleCallback(code) {
   try {
     const tokenResponse = await axios.post('https://accounts.spotify.com/api/token', querystring.stringify({
       grant_type: 'authorization_code',
       code: code,
-      redirect_uri: process.env.SPOTIFY_REDIRECT_URI,
-      client_id: process.env.SPOTIFY_CLIENT_ID,
-      client_secret: process.env.SPOTIFY_CLIENT_SECRET
+      redirect_uri: SPOTIFY_REDIRECT_URI,
+      client_id: SPOTIFY_CLIENT_ID,
+      client_secret: SPOTIFY_CLIENT_SECRET
     }), {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     });
 
+    
     accessToken = tokenResponse.data.access_token;
     refreshToken = tokenResponse.data.refresh_token;
     tokenExpiry = Date.now() + (tokenResponse.data.expires_in * 1000);
 
     saveTokens({ accessToken, refreshToken, tokenExpiry });
 
-    return { accessToken, refreshToken };
+    return { accessToken, refreshToken }; 
   } catch (error) {
-    console.log(error.response);
+    console.error('Failed to exchange authorization code for tokens:', error.response ? error.response.data : error.message);
     throw new Error('Failed to exchange authorization code for tokens');
   }
 }
 
-// Refreshes the access token using the refresh token
+async function getSpotifyAccessToken() {
+  if (Date.now() < tokenExpiry) {
+    console.log('Using the existing token');
+    return accessToken;
+  }
+
+  return await refreshAccessToken(); 
+}
+
 async function refreshAccessToken() {
   if (!refreshToken) {
     throw new Error('No refresh token available');
@@ -69,11 +78,13 @@ async function refreshAccessToken() {
   try {
     const tokenResponse = await axios.post('https://accounts.spotify.com/api/token', querystring.stringify({
       grant_type: 'refresh_token',
-      refresh_token: refreshToken
+      refresh_token: refreshToken,
+      client_id: SPOTIFY_CLIENT_ID,
+      client_secret: SPOTIFY_CLIENT_SECRET
     }), {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${Buffer.from(`${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`).toString('base64')}`
+        'Authorization': `Basic ${Buffer.from(`${SPOTIFY_CLIENT_ID}:${SPOTIFY_CLIENT_SECRET}`).toString('base64')}`
       }
     });
 
@@ -82,41 +93,11 @@ async function refreshAccessToken() {
 
     saveTokens({ accessToken, refreshToken, tokenExpiry });
 
-    return accessToken;
+    return accessToken; 
   } catch (error) {
+    console.error('Could not refresh Spotify access token:', error.response ? error.response.data : error.message);
     throw new Error('Could not refresh Spotify access token');
   }
 }
 
-// Retrieves the access token; refreshes if expired
-async function getSpotifyAccessToken() {
-  if (Date.now() < tokenExpiry) {
-    return accessToken;
-  }
-
-  return await refreshAccessToken();
-}
-
-// Searches for tracks using the Spotify API
-async function searchTracks(query) {
-  try {
-    const token = await getSpotifyAccessToken();
-
-    const response = await axios.get('https://api.spotify.com/v1/search', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      params: {
-        q: query,
-        type: 'track',
-        limit: 10
-      }
-    });
-
-    return response.data;
-  } catch (error) {
-    throw new Error('Could not search tracks');
-  }
-}
-
-module.exports = { handleCallback, getSpotifyAccessToken, searchTracks };
+module.exports = { handleCallback, getSpotifyAccessToken };

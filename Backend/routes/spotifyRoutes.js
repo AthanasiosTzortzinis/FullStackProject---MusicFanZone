@@ -1,35 +1,27 @@
 const express = require('express');
 const router = express.Router();
-const spotifyService = require('../Services/spotifyService');
-const { TokenExpiredError } = require('jsonwebtoken');
+const spotifyService = require('../services/spotifyService');
+
+router.get('/login', (req, res) => {
+  const scopes = 'user-read-private user-read-email'; 
+  const authUrl = `https://accounts.spotify.com/authorize?client_id=${process.env.SPOTIFY_CLIENT_ID}&redirect_uri=${encodeURIComponent(process.env.SPOTIFY_REDIRECT_URI)}&scope=${encodeURIComponent(scopes)}&response_type=code`;
+  res.redirect(authUrl);
+});
 
 router.get('/callback', async (req, res) => {
   const code = req.query.code;
-  console.log("This is the code",code);
-
+  
   if (code) {
     try {
-      const { accessToken, refreshToken, expiresIn } = await spotifyService.handleCallback(code);
-      console.log('accessToken',accessToken);
-      spotifyService.saveTokens({accessToken, refreshToken, tokenExpiry:Date.now()+expiresIn*1000})
-     
-      res.json({ accessToken, refreshToken }); 
+      const { accessToken, refreshToken } = await spotifyService.handleCallback(code);
+      res.redirect(`http://localhost:3000?accessToken=${accessToken}`); 
     } catch (error) {
-      console.log(error);
+      console.error('Error fetching access token:', error);
       res.status(500).json({ error: 'Error fetching access token' });
     }
   } else {
+    console.error('Authorization code not provided');
     res.status(400).json({ error: 'Authorization code not provided' });
-  }
-});
-
-router.get('/search', async (req, res) => {
-  try {
-    const query = req.query.q || ''; 
-    const data = await spotifyService.searchTracks(query);
-    res.status(200).json(data);
-  } catch (err) {
-    res.status(500).json({ error: 'Error fetching data from Spotify' });
   }
 });
 
