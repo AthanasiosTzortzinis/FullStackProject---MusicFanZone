@@ -1,75 +1,88 @@
-import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from 'axios';  // Import axios for API requests
 
-const Login = ({ setIsLoggedIn, loginMessage }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+const Login = ({ setIsLoggedIn, redirectPath }) => {
+    const navigate = useNavigate();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [message, setMessage] = useState("");
+    const [success, setSuccess] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+    const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
 
-    try {
-      const response = await axios.post('http://localhost:4000/user/login', { email, password });
+    const validatePassword = (password) => {
+        return password.length >= 5;
+    };
 
-      if (response.data.status) {
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('username', response.data.username); 
-        setIsLoggedIn(true); 
-        setErrorMessage('');
-        navigate('/playlists'); 
-      } else {
-        setErrorMessage(response.data.msg);
-      }
-    } catch (error) {
-      setErrorMessage('Login failed. Please try again.');
-      console.error('Login error:', error);
-    }
-  };
+    const handleLogin = async (e) => {
+        e.preventDefault();
 
-  return (
-    <div className="login-container">
-      <h2>Login</h2>
+        if (!validateEmail(email) || !validatePassword(password)) {
+            setMessage('Please enter a valid email and password!');
+            setSuccess(false);
+            return;
+        }
 
-      {/* Display the login message if it exists */}
-      {loginMessage && (
-        <p style={{ color: 'red', fontSize: 'smaller' }}>{loginMessage}</p>
-      )}
+        try {
+            const response = await axios.post('http://localhost:4000/user/login', {
+                email,
+                password,
+            });
 
-      {location.state?.message && (
-        <p className="login-message" style={{ color: 'red' }}>{location.state.message}</p>
-      )}
+            if (response.status === 200) {
+                // Save the token and username
+                localStorage.setItem('token', response.data.token); 
+                localStorage.setItem('username', response.data.username); // Ensure username is stored
+                setIsLoggedIn(true);
+                setMessage("Login successful!");
+                setSuccess(true);
 
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+                setTimeout(() => {
+                    navigate(redirectPath); // Redirect to the page they wanted to access
+                }, 2000);
+            }
+        } catch (error) {
+            setMessage(error.response?.data?.msg || "Invalid credentials. Please try again.");
+            setSuccess(false);
+        }
+    };
+
+    return (
+        <div className="login-container">
+            <h2>Login</h2>
+            <form onSubmit={handleLogin}>
+                <div>
+                    <label htmlFor="email">Email:</label>
+                    <input
+                        type="email"
+                        id="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                    />
+                </div>
+                <div>
+                    <label htmlFor="password">Password:</label>
+                    <input
+                        type="password"
+                        id="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                </div>
+                <button type="submit">Login</button>
+            </form>
+
+            {/* Display messages */}
+            {success && <p style={{ color: 'green' }}>Login successful! Redirecting...</p>}
+            {(!success && message) && <p>{message}</p>} 
         </div>
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Login</button>
-      </form>
-
-      {errorMessage && <p className="error-message">{errorMessage}</p>}
-    </div>
-  );
+    );
 };
 
 export default Login;

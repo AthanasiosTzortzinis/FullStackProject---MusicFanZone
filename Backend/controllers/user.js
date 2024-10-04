@@ -40,9 +40,10 @@ const login = async (req, res) => {
         const isPasswordValid = await bcrypt.compare(password, oldUser.password);
         if (!isPasswordValid) return res.status(401).send({ msg: "Wrong password", status: false });
 
-        const payload = { id: oldUser._id, email: oldUser.email };
+        const payload = { id: oldUser._id, email: oldUser.email, username: oldUser.username }; // Include username
+
         const token = await jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: "1h" });
-        return res.status(200).send({ msg: "Login successfully!", status: true, token });
+        return res.status(200).send({ msg: "Login successfully!", status: true, token, username: oldUser.username }); // Include username in response
     } catch (error) {
         console.error(error);
         return res.status(500).send({ msg: "Server failed", status: false });
