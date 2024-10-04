@@ -6,8 +6,8 @@ import ReactPlayer from 'react-player';
 const TrackVideoManager = ({ playlists, selectedPlaylist, setSelectedPlaylist, setPlaylists, token }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-  const [playingTrackId, setPlayingTrackId] = useState(null); // Track currently being listened to
-  const [error, setError] = useState(null); // State for error messages
+  const [playingTrackId, setPlayingTrackId] = useState(null); 
+  const [error, setError] = useState(null); 
 
   const axiosInstance = axios.create({
     baseURL: 'http://localhost:4000',
@@ -24,10 +24,10 @@ const TrackVideoManager = ({ playlists, selectedPlaylist, setSelectedPlaylist, s
       });
   
       setSearchResults(response.data);
-      setError(null); // Clear error on successful search
+      setError(null); 
     } catch (error) {
       console.error('Error searching tracks:', error);
-      setError('Error fetching search results. Please try again.'); // Set error message
+      setError('Error fetching search results. Please try again.'); 
     }
   };
 
@@ -50,7 +50,7 @@ const TrackVideoManager = ({ playlists, selectedPlaylist, setSelectedPlaylist, s
       setPlaylists(updatedPlaylists);
     } catch (error) {
       console.error('Error adding track to playlist:', error);
-      setError('Error adding track to playlist. Please try again.'); // Set error message
+      setError('Error adding track to playlist. Please try again.'); 
     }
   };
 
@@ -71,12 +71,12 @@ const TrackVideoManager = ({ playlists, selectedPlaylist, setSelectedPlaylist, s
       setPlaylists(updatedPlaylists);
     } catch (error) {
       console.error('Error deleting track from playlist:', error);
-      setError('Error deleting track from playlist. Please try again.'); // Set error message
+      setError('Error deleting track from playlist. Please try again.'); 
     }
   };
 
   const toggleListenTrack = (trackId) => {
-    setPlayingTrackId((prevTrackId) => (prevTrackId === trackId ? null : trackId)); // Toggle track playback
+    setPlayingTrackId((prevTrackId) => (prevTrackId === trackId ? null : trackId)); 
   };
 
   return (
@@ -95,7 +95,7 @@ const TrackVideoManager = ({ playlists, selectedPlaylist, setSelectedPlaylist, s
         onChange={(e) => {
           setSearchQuery(e.target.value);
           if (!e.target.value) {
-            setSearchResults([]); // Clear results when the search bar is empty
+            setSearchResults([]); 
           }
         }}
         placeholder="Search for tracks..."
@@ -113,7 +113,7 @@ const TrackVideoManager = ({ playlists, selectedPlaylist, setSelectedPlaylist, s
               href={`https://www.youtube.com/watch?v=${track.id.videoId}`}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ textDecoration: 'none', color: 'blue' }} // No underline and blue text color
+              style={{ textDecoration: 'none', color: 'blue' }} 
             >
               {track.snippet.title}
             </a>

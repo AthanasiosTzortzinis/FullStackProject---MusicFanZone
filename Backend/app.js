@@ -17,12 +17,10 @@ app.use(express.json());
 
 app.use('/user', userRoutes); 
 
-// Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
 
-// Basic route
 app.get('/', (req, res) => {
   res.send('Welcome to the MusicFanZone');
 });
@@ -32,10 +30,10 @@ app.use('/comments', commentsRoutes);
 app.use('/playlists', playlistRoutes);
 app.use('/tracks', trackRoutes);
 
-// YouTube API Base URL
+
 const YOUTUBE_BASE_URL = 'https://www.googleapis.com/youtube/v3';
 
-// Route to search for tracks in YouTube
+
 app.get('/youtube/search', async (req, res) => {
   const { query } = req.query;
 
@@ -49,9 +47,9 @@ app.get('/youtube/search', async (req, res) => {
         part: 'snippet',
         q: query,
         type: 'video',
-        videoCategoryId: '10', // Music category
-        maxResults: 20, // Specify the number of results
-        key: process.env.YOUTUBE_API_KEY, // Use the API key from .env
+        videoCategoryId: '10', 
+        maxResults: 20, 
+        key: process.env.YOUTUBE_API_KEY, 
       },
     });
     res.json(response.data.items);
@@ -61,7 +59,7 @@ app.get('/youtube/search', async (req, res) => {
   }
 });
 
-// Route to get video details by video ID
+
 app.get('/youtube/video/:videoId', async (req, res) => {
   const { videoId } = req.params;
 
@@ -70,7 +68,7 @@ app.get('/youtube/video/:videoId', async (req, res) => {
       params: {
         part: 'snippet,contentDetails,statistics',
         id: videoId,
-        key: process.env.YOUTUBE_API_KEY, // Use the API key from .env
+        key: process.env.YOUTUBE_API_KEY, 
       },
     });
     res.json(response.data);
@@ -80,18 +78,17 @@ app.get('/youtube/video/:videoId', async (req, res) => {
   }
 });
 
-// 404 error handler
+
 app.use((req, res, next) => {
   res.status(404).json({ error: 'Not Found' });
 });
 
-// General error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-// Start the server
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });

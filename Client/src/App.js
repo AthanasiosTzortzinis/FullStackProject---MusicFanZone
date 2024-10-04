@@ -10,10 +10,9 @@ import Home from './Components/Home';
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
-  const [redirectPath, setRedirectPath] = useState('/'); // Default redirect path
+  const [redirectPath, setRedirectPath] = useState('/'); 
 
   useEffect(() => {
-    // Check for a token in localStorage to set login state
     const token = localStorage.getItem('token');
     if (token) {
       setIsLoggedIn(true);
@@ -26,10 +25,9 @@ function App() {
     localStorage.removeItem('username');
     setLoginMessage("You have logged out successfully.");
 
-    // Set a timeout to clear the message after 5 seconds
     setTimeout(() => {
         setLoginMessage("");
-    }, 5000); // 5000 milliseconds = 5 seconds
+    }, 5000); 
   };
 
   return (

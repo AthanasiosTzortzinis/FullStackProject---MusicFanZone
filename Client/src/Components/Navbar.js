@@ -12,11 +12,11 @@ const Navbar = ({ isLoggedIn, handleLogout }) => {
   
   let username = "";
 
-  // Decode token and extract username if token exists
+  
   if (token) {
     try {
       const decodedToken = jwtDecode(token);
-      username = decodedToken.username; // Extract username from token
+      username = decodedToken.username; 
     } catch (error) {
       console.error("Token decoding error:", error);
     }

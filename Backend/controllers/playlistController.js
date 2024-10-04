@@ -3,7 +3,7 @@ const Track = require('../models/track');
 
 // Function to create a playlist
 exports.createPlaylist = async (req, res) => {
-    const { name, text } = req.body; // Assuming 'text' is part of the request body
+    const { name, text } = req.body; 
     const owner = req.user.id;
 
     if (!name) {
@@ -125,7 +125,7 @@ exports.removeTrackFromPlaylist = async (req, res) => {
         playlist.tracks = playlist.tracks.filter(track => track.trackId !== trackId);
         await playlist.save();
 
-        res.status(204).send(); // No content
+        res.status(204).send(); 
     } catch (error) {
         console.error('Error deleting track from playlist:', error);
         res.status(500).json({ error: 'Failed to delete track from playlist' });

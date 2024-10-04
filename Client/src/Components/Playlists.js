@@ -1,7 +1,7 @@
-// Playlists.js
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import TrackVideoManager from './TrackVideoManager'; // Import the TrackVideoManager
+import TrackVideoManager from './TrackVideoManager'; 
 
 const Playlists = () => {
   const [playlists, setPlaylists] = useState([]);

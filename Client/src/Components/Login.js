@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';  // Import axios for API requests
+import axios from 'axios';  
 
 const Login = ({ setIsLoggedIn, redirectPath }) => {
     const navigate = useNavigate();
@@ -34,15 +34,15 @@ const Login = ({ setIsLoggedIn, redirectPath }) => {
             });
 
             if (response.status === 200) {
-                // Save the token and username
+                
                 localStorage.setItem('token', response.data.token); 
-                localStorage.setItem('username', response.data.username); // Ensure username is stored
+                localStorage.setItem('username', response.data.username); 
                 setIsLoggedIn(true);
                 setMessage("Login successful!");
                 setSuccess(true);
 
                 setTimeout(() => {
-                    navigate(redirectPath); // Redirect to the page they wanted to access
+                    navigate(redirectPath); 
                 }, 2000);
             }
         } catch (error) {
