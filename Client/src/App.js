@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link /* eslint-disable-next-line */ } from 'react-router-dom';  
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Navbar from './Components/Navbar';
 import Playlists from './Components/Playlists';
 import Forum from './Components/Forum';
@@ -10,13 +10,12 @@ import Home from './Components/Home';
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
-  const [redirectPath, setRedirectPath] = useState('/'); 
+  const [redirectPath, setRedirectPath] = useState('/'); // Default redirect path
 
   useEffect(() => {
+    // Check for a token in localStorage to set login state
     const token = localStorage.getItem('token');
-    if (token) {
-      setIsLoggedIn(true);
-    }
+    setIsLoggedIn(!!token); // Update isLoggedIn based on token presence
   }, []);
 
   const handleLogout = () => {
@@ -25,9 +24,10 @@ function App() {
     localStorage.removeItem('username');
     setLoginMessage("You have logged out successfully.");
 
+    // Set a timeout to clear the message after 5 seconds
     setTimeout(() => {
-        setLoginMessage("");
-    }, 5000); 
+      setLoginMessage("");
+    }, 5000); // 5000 milliseconds = 5 seconds
   };
 
   return (
@@ -66,10 +66,7 @@ function App() {
             )
           } 
         />
-        <Route 
-          path="/register" 
-          element={<Register />} 
-        />
+        <Route path="/register" element={<Register />} />
       </Routes>
 
       {/* Display Login Message */}

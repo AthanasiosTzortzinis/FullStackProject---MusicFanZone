@@ -4,18 +4,18 @@ const commentSchema = new mongoose.Schema({
     username: {
         type: String,
         required: true,
-        trim: true
     },
     content: {
         type: String,
-        required: true
+        required: true,
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
+    topicId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'Topic', // Assuming you have a Topic model to reference
     },
-    owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
-});
+}, { timestamps: true });
 
 const Comment = mongoose.model('Comment', commentSchema);
+
 module.exports = Comment;
