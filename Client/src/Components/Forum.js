@@ -7,10 +7,12 @@ const Forum = () => {
     const [editingTopic, setEditingTopic] = useState(null);
     const [comments, setComments] = useState({});
     const [newComment, setNewComment] = useState('');
+    const [editingCommentId, setEditingCommentId] = useState(null);
+    const [editingCommentContent, setEditingCommentContent] = useState('');
     const [selectedTopicId, setSelectedTopicId] = useState('');
-    const [error, setError] = useState(null); // State to store error messages
+    const [error, setError] = useState(null);
 
-    const username = "YourUsername"; // Replace with actual user data if applicable
+    const username = 'user'; 
 
     // Fetch all topics
     const fetchTopics = async () => {
@@ -23,32 +25,34 @@ const Forum = () => {
         }
     };
 
-    // Create a new topic
-    const createTopic = async () => {
-        try {
-            const response = await axios.post('http://localhost:4000/api/topics', newTopic);
-            setTopics([...topics, response.data]);
-            setNewTopic({ title: '', description: '' });
-            setError(null); // Reset error on success
-        } catch (error) {
-            console.error("Error creating topic:", error);
-            setError("Failed to create topic. Please try again.");
+    // Create a new topic or update an existing topic
+    const createOrUpdateTopic = async () => {
+        if (!newTopic.title.trim()) {
+            setError("Please provide a title for the topic.");
+            return;
         }
-    };
+    
+        if (!newTopic.description.trim()) {
+            setError("Please provide a description for the topic.");
+            return;
+        }
 
-    // Update an existing topic
-    const updateTopic = async () => {
-        if (editingTopic) {
-            try {
+        try {
+            if (editingTopic) {
                 const response = await axios.put(`http://localhost:4000/api/topics/${editingTopic._id}`, newTopic);
                 setTopics(topics.map(topic => (topic._id === editingTopic._id ? response.data : topic)));
                 setEditingTopic(null);
-                setNewTopic({ title: '', description: '' });
-                setError(null); // Reset error on success
-            } catch (error) {
-                console.error("Error updating topic:", error);
-                setError("Failed to update topic. Please try again.");
+            } else {
+                const response = await axios.post('http://localhost:4000/api/topics', newTopic);
+                setTopics([...topics, response.data]);
             }
+            // Set the new topic in the selected topic so that it displays correctly
+            setSelectedTopicId(editingTopic ? editingTopic._id : newTopic._id);
+            setNewTopic({ title: '', description: '' });
+            setError(null);
+        } catch (error) {
+            console.error("Error saving topic:", error);
+            setError("Failed to save topic. Please try again.");
         }
     };
 
@@ -57,7 +61,12 @@ const Forum = () => {
         try {
             await axios.delete(`http://localhost:4000/api/topics/${topicId}`);
             setTopics(topics.filter(topic => topic._id !== topicId));
-            setError(null); // Reset error on success
+            setError(null);
+            // Reset the selected topic if the deleted topic is currently selected
+            if (selectedTopicId === topicId) {
+                setSelectedTopicId('');
+                setNewTopic({ title: '', description: '' }); // Clear fields if topic is deleted
+            }
         } catch (error) {
             console.error("Error deleting topic:", error);
             setError("Failed to delete topic. Please try again.");
@@ -77,20 +86,39 @@ const Forum = () => {
 
     // Create a new comment for a specific topic
     const createComment = async (topicId) => {
-    try {
-        await axios.post(`http://localhost:4000/api/topics/${topicId}/comments`, {
-            username: username,
-            content: newComment
-        });
-        setNewComment('');  // Clear the comment box
-        fetchComments(topicId);  // Refresh comments from the server
-        setError(null); // Reset error on success
-    } catch (error) {
-        console.error("Error creating comment:", error);
-        setError("Failed to add comment. Please try again.");
-    }
-};
+        if (!newComment.trim()) return;
+        const commentData = { username: username, content: newComment };
+        try {
+            const response = await axios.post(`http://localhost:4000/api/topics/${topicId}/comments`, commentData);
+            setComments(prev => ({ ...prev, [topicId]: [...(prev[topicId] || []), response.data] }));
+            setNewComment('');
+            setError(null);
+        } catch (error) {
+            console.error('Error creating comment:', error.response ? error.response.data : error.message);
+            setError(error.response?.data?.error || "Failed to create comment. Please try again.");
+        }
+    };
 
+    // Update a comment
+    const updateComment = async (topicId) => {
+        if (!editingCommentContent.trim()) return;
+        try {
+            const response = await axios.put(`http://localhost:4000/api/topics/${topicId}/comments/${editingCommentId}`, {
+                content: editingCommentContent
+            });
+            setComments(prev => ({
+                ...prev,
+                [topicId]: prev[topicId].map(comment => (comment._id === editingCommentId ? response.data : comment))
+            }));
+            setEditingCommentId(null);
+            setEditingCommentContent('');
+            setError(null);
+        } catch (error) {
+            console.error('Error updating comment:', error);
+            setError("Failed to update comment. Please try again.");
+        }
+    };
+    
     // Delete a comment
     const deleteComment = async (topicId, commentId) => {
         try {
@@ -99,47 +127,57 @@ const Forum = () => {
                 ...prev,
                 [topicId]: prev[topicId].filter(comment => comment._id !== commentId)
             }));
-            setError(null); // Reset error on success
+            setError(null);
         } catch (error) {
             console.error("Error deleting comment:", error);
             setError("Failed to delete comment. Please try again.");
         }
     };
 
+    // Initial fetch for topics
     useEffect(() => {
         fetchTopics();
     }, []);
 
-    // Handle topic selection
     const handleTopicChange = (e) => {
         const topicId = e.target.value;
         setSelectedTopicId(topicId);
-
-        // Fetch comments only if a topic is selected
         if (topicId) {
+            const selectedTopic = topics.find(topic => topic._id === topicId);
+            setNewTopic({ title: selectedTopic.title, description: selectedTopic.description }); // Prepopulate fields for editing
             fetchComments(topicId);
         } else {
-            setComments({}); // Reset comments if no topic is selected
+            setComments({});
+            setNewTopic({ title: '', description: '' }); // Clear fields if no topic is selected
         }
     };
 
-    // Start editing a topic
     const handleEditClick = (topic) => {
         setEditingTopic(topic);
         setNewTopic({ title: topic.title, description: topic.description });
     };
 
+    const handleCommentEditClick = (comment) => {
+        setEditingCommentId(comment._id);
+        setEditingCommentContent(comment.content);
+    };
+
     const handleUpdateSubmit = () => {
-        updateTopic();
+        createOrUpdateTopic();
+    };
+
+    const handleUpdateTopic = () => {
+        createOrUpdateTopic();
+        setEditingTopic(null); // Reset editing topic
     };
 
     return (
         <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
             <h2 style={{ textAlign: 'center' }}>Join the Discussion!</h2>
+            {error && <div style={{ color: 'red', textAlign: 'center' }}>{error}</div>}
 
-            {error && <div style={{ color: 'red', textAlign: 'center' }}>{error}</div>} {/* Display error message */}
-
-            <h3>Create a New Topic</h3>
+            {/* Topic Creation/Editing Section */}
+            <h3>{editingTopic ? 'Edit Topic' : 'Create a New Topic'}</h3>
             <div style={{ marginBottom: '20px' }}>
                 <input
                     type="text"
@@ -154,9 +192,12 @@ const Forum = () => {
                     onChange={(e) => setNewTopic({ ...newTopic, description: e.target.value })}
                     style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
                 />
-                <button onClick={createTopic} style={{ padding: '10px 20px' }}>Create Topic</button>
+                <button onClick={handleUpdateSubmit} style={{ padding: '10px 20px' }}>
+                    {editingTopic ? 'Update Topic' : 'Create Topic'}
+                </button>
             </div>
 
+            {/* Topic Selection Section */}
             <h3>Choose a Topic</h3>
             <select
                 value={selectedTopicId}
@@ -169,63 +210,67 @@ const Forum = () => {
                 ))}
             </select>
 
+            {/* Topic Details and Comments Section */}
             {selectedTopicId && (
-                <>
+                <div>
                     <h3>Topic Details</h3>
-                    <div>
-                        {topics.find(topic => topic._id === selectedTopicId) && (
-                            <>
-                                <h4>{topics.find(topic => topic._id === selectedTopicId).title}</h4>
-                                <p>{topics.find(topic => topic._id === selectedTopicId).description}</p>
+                    {topics.find(topic => topic._id === selectedTopicId) && (
+                        <>
+                            <h4>Title: {newTopic.title}</h4>
+                            <p>Description: {newTopic.description}</p>
+                            {editingTopic ? (
+                                <>
+                                    <button onClick={() => handleUpdateTopic()} style={{ marginRight: '10px' }}>Save Changes</button>
+                                    <button onClick={() => setEditingTopic(null)} style={{ marginRight: '10px' }}>Cancel</button>
+                                </>
+                            ) : (
+                                <>
+                                    <button onClick={() => handleEditClick(topics.find(topic => topic._id === selectedTopicId))}>Edit Topic</button>
+                                    <button onClick={() => deleteTopic(selectedTopicId)} style={{ marginLeft: '10px' }}>Delete Topic</button>
+                                </>
+                            )}
+                        </>
+                    )}
 
-                                <button onClick={() => deleteTopic(selectedTopicId)} style={{ marginRight: '10px' }}>Delete Topic</button>
-                                <button onClick={() => handleEditClick(topics.find(topic => topic._id === selectedTopicId))}>Edit Topic</button>
-
-                                <h5>Comments</h5>
-                                {comments[selectedTopicId] && comments[selectedTopicId].length > 0 ? (
-                                    comments[selectedTopicId].map(comment => (
-                                        <div key={comment._id} style={{ padding: '5px 0' }}>
-                                            <p><strong>{comment.username}</strong>: {comment.content}</p>
-                                            <button onClick={() => deleteComment(selectedTopicId, comment._id)} style={{ marginRight: '10px' }}>Delete Comment</button>
-                                        </div>
-                                    ))
+                    {/* Comments Section */}
+                    <h5 style={{ marginTop: '15px' }}>Comments</h5>
+                    {comments[selectedTopicId] && comments[selectedTopicId].length > 0 ? (
+                        comments[selectedTopicId].map(comment => (
+                            <div key={comment._id} style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '10px' }}>
+                                <strong>{comment.username}:</strong>
+                                {editingCommentId === comment._id ? (
+                                    <div>
+                                        <input
+                                            type="text"
+                                            value={editingCommentContent}
+                                            onChange={(e) => setEditingCommentContent(e.target.value)}
+                                            style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
+                                        />
+                                        <button onClick={() => updateComment(selectedTopicId)} style={{ marginRight: '10px' }}>Update</button>
+                                        <button onClick={() => setEditingCommentId(null)} style={{ marginRight: '10px' }}>Cancel</button>
+                                    </div>
                                 ) : (
-                                    <p>No comments yet.</p>
+                                    <div>
+                                        <span>{comment.content}</span>
+                                        <button onClick={() => handleCommentEditClick(comment)} style={{ marginLeft: '10px' }}>Edit</button>
+                                        <button onClick={() => deleteComment(selectedTopicId, comment._id)} style={{ marginLeft: '10px' }}>Delete</button>
+                                    </div>
                                 )}
+                            </div>
+                        ))
+                    ) : (
+                        <p>No comments yet.</p>
+                    )}
 
-                                <h6 style={{ marginTop: '15px' }}>Add a Comment</h6>
-                                <textarea
-                                    placeholder="Your Comment"
-                                    value={newComment}
-                                    onChange={(e) => setNewComment(e.target.value)}
-                                    style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
-                                />
-                                <button onClick={() => createComment(selectedTopicId)} style={{ padding: '10px 20px' }}>Add Comment</button>
-                            </>
-                        )}
-                    </div>
-                </>
-            )}
-
-            {/* Editing Topic Section */}
-            {editingTopic && (
-                <div style={{ marginTop: '20px' }}>
-                    <h3>Edit Topic</h3>
-                    <input
-                        type="text"
-                        placeholder="Title"
-                        value={newTopic.title}
-                        onChange={(e) => setNewTopic({ ...newTopic, title: e.target.value })}
-                        style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
-                    />
+                    {/* Add Comment Section */}
+                    <h6 style={{ marginTop: '15px' }}>Add a Comment</h6>
                     <textarea
-                        placeholder="Description"
-                        value={newTopic.description}
-                        onChange={(e) => setNewTopic({ ...newTopic, description: e.target.value })}
+                        placeholder="Your Comment"
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
                         style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
                     />
-                    <button onClick={handleUpdateSubmit} style={{ padding: '10px 20px' }}>Update Topic</button>
-                    <button onClick={() => setEditingTopic(null)} style={{ padding: '10px 20px', marginLeft: '10px' }}>Cancel</button>
+                    <button onClick={() => createComment(selectedTopicId)} style={{ padding: '10px 20px' }}>Add Comment</button>
                 </div>
             )}
         </div>

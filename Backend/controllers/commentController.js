@@ -30,12 +30,14 @@ exports.createComment = async (req, res) => {
 
 // Get all comments for a specific topic
 exports.getAllComments = async (req, res) => {
-    const { topicId } = req.params; // Extracting topicId from the request parameters
-
+    const { topicId } = req.params; // Get topicId from request parameters
+    console.log('Topic ID:', topicId); // Log topicId for debugging
     try {
-        // Find all comments associated with the topicId
-        const comments = await Comment.find({ topicId });
-        res.status(200).json(comments); // Return the comments
+        const comments = await Comment.find({ topicId }); // Find comments for the specific topic
+        if (!comments.length) {
+            return res.status(404).json({ error: 'No comments found for this topic' });
+        }
+        res.status(200).json(comments);
     } catch (error) {
         console.error('Error fetching comments:', error);
         res.status(500).json({ error: 'Error fetching comments' });
@@ -86,10 +88,9 @@ exports.updateComment = async (req, res) => {
 // Delete a specific comment by its ID
 exports.deleteComment = async (req, res) => {
     const { topicId } = req.params; // Extracting topicId from the request parameters
+    const { id } = req.params; // Extracting comment ID from the request parameters
 
     try {
-        const { id } = req.params; // Extracting comment ID from the request parameters
-
         // Validate comment ID
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ error: 'Invalid comment ID' });
