@@ -14,7 +14,6 @@ const Forum = () => {
 
     const username = 'user'; 
 
-    // Fetch all topics
     const fetchTopics = async () => {
         try {
             const response = await axios.get('http://localhost:4000/api/topics');
@@ -25,7 +24,7 @@ const Forum = () => {
         }
     };
 
-    // Create a new topic or update an existing topic
+    
     const createOrUpdateTopic = async () => {
         if (!newTopic.title.trim()) {
             setError("Please provide a title for the topic.");
@@ -46,7 +45,7 @@ const Forum = () => {
                 const response = await axios.post('http://localhost:4000/api/topics', newTopic);
                 setTopics([...topics, response.data]);
             }
-            // Set the new topic in the selected topic so that it displays correctly
+            
             setSelectedTopicId(editingTopic ? editingTopic._id : newTopic._id);
             setNewTopic({ title: '', description: '' });
             setError(null);
@@ -56,16 +55,16 @@ const Forum = () => {
         }
     };
 
-    // Delete a topic
+    
     const deleteTopic = async (topicId) => {
         try {
             await axios.delete(`http://localhost:4000/api/topics/${topicId}`);
             setTopics(topics.filter(topic => topic._id !== topicId));
             setError(null);
-            // Reset the selected topic if the deleted topic is currently selected
+            
             if (selectedTopicId === topicId) {
                 setSelectedTopicId('');
-                setNewTopic({ title: '', description: '' }); // Clear fields if topic is deleted
+                setNewTopic({ title: '', description: '' }); 
             }
         } catch (error) {
             console.error("Error deleting topic:", error);
@@ -73,7 +72,7 @@ const Forum = () => {
         }
     };
 
-    // Fetch comments for a specific topic
+    
     const fetchComments = async (topicId) => {
         try {
             const response = await axios.get(`http://localhost:4000/api/topics/${topicId}/comments`);
@@ -84,7 +83,7 @@ const Forum = () => {
         }
     };
 
-    // Create a new comment for a specific topic
+
     const createComment = async (topicId) => {
         if (!newComment.trim()) return;
         const commentData = { username: username, content: newComment };
@@ -99,7 +98,7 @@ const Forum = () => {
         }
     };
 
-    // Update a comment
+
     const updateComment = async (topicId) => {
         if (!editingCommentContent.trim()) return;
         try {
@@ -119,7 +118,7 @@ const Forum = () => {
         }
     };
     
-    // Delete a comment
+    
     const deleteComment = async (topicId, commentId) => {
         try {
             await axios.delete(`http://localhost:4000/api/topics/${topicId}/comments/${commentId}`);
@@ -134,7 +133,7 @@ const Forum = () => {
         }
     };
 
-    // Initial fetch for topics
+    
     useEffect(() => {
         fetchTopics();
     }, []);
@@ -144,11 +143,11 @@ const Forum = () => {
         setSelectedTopicId(topicId);
         if (topicId) {
             const selectedTopic = topics.find(topic => topic._id === topicId);
-            setNewTopic({ title: selectedTopic.title, description: selectedTopic.description }); // Prepopulate fields for editing
+            setNewTopic({ title: selectedTopic.title, description: selectedTopic.description }); 
             fetchComments(topicId);
         } else {
             setComments({});
-            setNewTopic({ title: '', description: '' }); // Clear fields if no topic is selected
+            setNewTopic({ title: '', description: '' }); 
         }
     };
 
@@ -168,7 +167,7 @@ const Forum = () => {
 
     const handleUpdateTopic = () => {
         createOrUpdateTopic();
-        setEditingTopic(null); // Reset editing topic
+        setEditingTopic(null); 
     };
 
     return (
