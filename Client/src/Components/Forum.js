@@ -12,7 +12,7 @@ const Forum = () => {
     const [selectedTopicId, setSelectedTopicId] = useState('');
     const [error, setError] = useState(null);
 
-    const username = 'user'; 
+    const username = 'user';
 
     const fetchTopics = async () => {
         try {
@@ -24,13 +24,12 @@ const Forum = () => {
         }
     };
 
-    
     const createOrUpdateTopic = async () => {
         if (!newTopic.title.trim()) {
             setError("Please provide a title for the topic.");
             return;
         }
-    
+
         if (!newTopic.description.trim()) {
             setError("Please provide a description for the topic.");
             return;
@@ -41,13 +40,14 @@ const Forum = () => {
                 const response = await axios.put(`http://localhost:4000/api/topics/${editingTopic._id}`, newTopic);
                 setTopics(topics.map(topic => (topic._id === editingTopic._id ? response.data : topic)));
                 setEditingTopic(null);
+                setNewTopic({ title: '', description: '' });
             } else {
                 const response = await axios.post('http://localhost:4000/api/topics', newTopic);
                 setTopics([...topics, response.data]);
+                setSelectedTopicId(response.data._id);
+                setNewTopic({ title: '', description: '' });
             }
-            
-            setSelectedTopicId(editingTopic ? editingTopic._id : newTopic._id);
-            setNewTopic({ title: '', description: '' });
+
             setError(null);
         } catch (error) {
             console.error("Error saving topic:", error);
@@ -55,7 +55,6 @@ const Forum = () => {
         }
     };
 
-    
     const deleteTopic = async (topicId) => {
         try {
             await axios.delete(`http://localhost:4000/api/topics/${topicId}`);
@@ -72,7 +71,6 @@ const Forum = () => {
         }
     };
 
-    
     const fetchComments = async (topicId) => {
         try {
             const response = await axios.get(`http://localhost:4000/api/topics/${topicId}/comments`);
@@ -82,7 +80,6 @@ const Forum = () => {
             setError("Could not load comments. Please try again.");
         }
     };
-
 
     const createComment = async (topicId) => {
         if (!newComment.trim()) return;
@@ -97,7 +94,6 @@ const Forum = () => {
             setError(error.response?.data?.error || "Failed to create comment. Please try again.");
         }
     };
-
 
     const updateComment = async (topicId) => {
         if (!editingCommentContent.trim()) return;
@@ -117,8 +113,7 @@ const Forum = () => {
             setError("Failed to update comment. Please try again.");
         }
     };
-    
-    
+
     const deleteComment = async (topicId, commentId) => {
         try {
             await axios.delete(`http://localhost:4000/api/topics/${topicId}/comments/${commentId}`);
@@ -133,7 +128,6 @@ const Forum = () => {
         }
     };
 
-    
     useEffect(() => {
         fetchTopics();
     }, []);
@@ -142,9 +136,8 @@ const Forum = () => {
         const topicId = e.target.value;
         setSelectedTopicId(topicId);
         if (topicId) {
-            const selectedTopic = topics.find(topic => topic._id === topicId);
-            setNewTopic({ title: selectedTopic.title, description: selectedTopic.description }); 
             fetchComments(topicId);
+            setEditingTopic(null);
         } else {
             setComments({});
             setNewTopic({ title: '', description: '' }); 
@@ -156,27 +149,12 @@ const Forum = () => {
         setNewTopic({ title: topic.title, description: topic.description });
     };
 
-    const handleCommentEditClick = (comment) => {
-        setEditingCommentId(comment._id);
-        setEditingCommentContent(comment.content);
-    };
-
-    const handleUpdateSubmit = () => {
-        createOrUpdateTopic();
-    };
-
-    const handleUpdateTopic = () => {
-        createOrUpdateTopic();
-        setEditingTopic(null); 
-    };
-
     return (
         <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
             <h2 style={{ textAlign: 'center' }}>Join the Discussion!</h2>
             {error && <div style={{ color: 'red', textAlign: 'center' }}>{error}</div>}
 
-            {/* Topic Creation/Editing Section */}
-            <h3>{editingTopic ? 'Edit Topic' : 'Create a New Topic'}</h3>
+            <h3>Create a New Topic</h3>
             <div style={{ marginBottom: '20px' }}>
                 <input
                     type="text"
@@ -191,12 +169,11 @@ const Forum = () => {
                     onChange={(e) => setNewTopic({ ...newTopic, description: e.target.value })}
                     style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
                 />
-                <button onClick={handleUpdateSubmit} style={{ padding: '10px 20px' }}>
+                <button onClick={createOrUpdateTopic} style={{ padding: '10px 20px' }}>
                     {editingTopic ? 'Update Topic' : 'Create Topic'}
                 </button>
             </div>
 
-            {/* Topic Selection Section */}
             <h3>Choose a Topic</h3>
             <select
                 value={selectedTopicId}
@@ -209,33 +186,59 @@ const Forum = () => {
                 ))}
             </select>
 
-            {/* Topic Details and Comments Section */}
             {selectedTopicId && (
                 <div>
                     <h3>Topic Details</h3>
                     {topics.find(topic => topic._id === selectedTopicId) && (
                         <>
-                            <h4>Title: {newTopic.title}</h4>
-                            <p>Description: {newTopic.description}</p>
                             {editingTopic ? (
                                 <>
-                                    <button onClick={() => handleUpdateTopic()} style={{ marginRight: '10px' }}>Save Changes</button>
-                                    <button onClick={() => setEditingTopic(null)} style={{ marginRight: '10px' }}>Cancel</button>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <h4 style={{ margin: '0 10px 0 0' }}>Title:</h4>
+                                        <input
+                                            type="text"
+                                            value={newTopic.title}
+                                            onChange={(e) => setNewTopic({ ...newTopic, title: e.target.value })}
+                                            style={{ width: '100%', marginRight: '10px', padding: '10px' }}
+                                        />
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <h4 style={{ margin: '0 10px 0 0' }}>Description:</h4>
+                                        <textarea
+                                            value={newTopic.description}
+                                            onChange={(e) => setNewTopic({ ...newTopic, description: e.target.value })}
+                                            style={{ width: '100%', marginRight: '10px', padding: '10px' }}
+                                        />
+                                    </div>
+                                    <button onClick={createOrUpdateTopic} style={{ marginTop: '10px' }}>
+                                        Update
+                                    </button>
                                 </>
                             ) : (
                                 <>
-                                    <button onClick={() => handleEditClick(topics.find(topic => topic._id === selectedTopicId))}>Edit Topic</button>
-                                    <button onClick={() => deleteTopic(selectedTopicId)} style={{ marginLeft: '10px' }}>Delete Topic</button>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <h4 style={{ margin: '0 10px 0 0' }}>Title:</h4>
+                                        <span>{topics.find(topic => topic._id === selectedTopicId).title}</span>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                                        <h4 style={{ margin: '0 10px 0 0' }}>Description:</h4>
+                                        <span>{topics.find(topic => topic._id === selectedTopicId).description}</span>
+                                    </div>
+                                    <button onClick={() => handleEditClick(topics.find(topic => topic._id === selectedTopicId))} style={{ marginTop: '10px' }}>
+                                        Edit
+                                    </button>
+                                    <button onClick={() => deleteTopic(selectedTopicId)} style={{ marginLeft: '10px' }}>
+                                        Delete
+                                    </button>
                                 </>
                             )}
                         </>
                     )}
 
-                    {/* Comments Section */}
                     <h5 style={{ marginTop: '15px' }}>Comments</h5>
-                    {comments[selectedTopicId] && comments[selectedTopicId].length > 0 ? (
+                    {comments[selectedTopicId]?.length ? (
                         comments[selectedTopicId].map(comment => (
-                            <div key={comment._id} style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '10px' }}>
+                            <div key={comment._id} style={{ marginBottom: '10px' }}>
                                 <strong>{comment.username}:</strong>
                                 {editingCommentId === comment._id ? (
                                     <div>
@@ -246,12 +249,14 @@ const Forum = () => {
                                             style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
                                         />
                                         <button onClick={() => updateComment(selectedTopicId)} style={{ marginRight: '10px' }}>Update</button>
-                                        <button onClick={() => setEditingCommentId(null)} style={{ marginRight: '10px' }}>Cancel</button>
                                     </div>
                                 ) : (
                                     <div>
                                         <span>{comment.content}</span>
-                                        <button onClick={() => handleCommentEditClick(comment)} style={{ marginLeft: '10px' }}>Edit</button>
+                                        <button onClick={() => {
+                                            setEditingCommentId(comment._id);
+                                            setEditingCommentContent(comment.content);
+                                        }} style={{ marginLeft: '10px' }}>Edit</button>
                                         <button onClick={() => deleteComment(selectedTopicId, comment._id)} style={{ marginLeft: '10px' }}>Delete</button>
                                     </div>
                                 )}
@@ -261,7 +266,6 @@ const Forum = () => {
                         <p>No comments yet.</p>
                     )}
 
-                    {/* Add Comment Section */}
                     <h6 style={{ marginTop: '15px' }}>Add a Comment</h6>
                     <textarea
                         placeholder="Your Comment"
