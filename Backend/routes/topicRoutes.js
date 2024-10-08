@@ -1,12 +1,98 @@
 const express = require('express');
+const Topic = require('../models/Topic'); 
+const jwt = require('jsonwebtoken');
 const router = express.Router();
-const topicController = require('../controllers/topicController'); // Ensure this path is correct
 
-// Define routes for topic management
-router.post('/', topicController.createTopic);   // Create a new topic
-router.get('/', topicController.getAllTopics);    // Get all topics
-router.get('/:id', topicController.getTopicById); // Get a specific topic by ID
-router.put('/:id', topicController.updateTopic);   // Update a specific topic
-router.delete('/:id', topicController.deleteTopic); // Delete a specific topic
+
+const authenticateUser = (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    try {
+        const payload = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = payload; 
+        next();
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+};
+
+
+router.post('/', authenticateUser, async (req, res) => {
+    const { title, description } = req.body;
+    const { username } = req.user;
+
+    if (!title || !description) {
+        return res.status(400).json({ error: 'Title and description are required' });
+    }
+
+    try {
+        const newTopic = new Topic({ title, description, createdBy: username });
+        const savedTopic = await newTopic.save();
+        return res.status(201).json(savedTopic); 
+    } catch (error) {
+        console.error('Error saving topic:', error);
+        return res.status(500).json({ error: 'Error saving topic', details: error.message });
+    }
+});
+
+
+router.get('/', async (req, res) => {
+    try {
+        const topics = await Topic.find();
+        res.status(200).json(topics);
+    } catch (error) {
+        console.error('Error fetching topics:', error);
+        res.status(500).json({ error: 'Error fetching topics' });
+    }
+});
+
+
+router.put('/:topicId', authenticateUser, async (req, res) => {
+    const { topicId } = req.params;
+    const { title, description } = req.body;
+
+    if (!title || !description) {
+        return res.status(400).json({ error: 'Title and description are required' });
+    }
+
+    try {
+        const updatedTopic = await Topic.findOneAndUpdate(
+            { _id: topicId, createdBy: req.user.username }, 
+            { title, description },
+            { new: true }
+        );
+
+        if (!updatedTopic) {
+            return res.status(404).json({ error: 'Topic not found or not authorized' });
+        }
+
+        res.status(200).json(updatedTopic);
+    } catch (error) {
+        console.error('Error updating topic:', error);
+        res.status(500).json({ error: 'Error updating topic' });
+    }
+});
+
+
+router.delete('/:topicId', authenticateUser, async (req, res) => {
+    const { topicId } = req.params;
+
+    try {
+        const deletedTopic = await Topic.findOneAndDelete({ _id: topicId, createdBy: req.user.username }); 
+
+        if (!deletedTopic) {
+            return res.status(404).json({ error: 'Topic not found or not authorized' });
+        }
+
+        res.status(204).send(); 
+    } catch (error) {
+        console.error('Error deleting topic:', error);
+        return res.status(500).json({ error: 'Error deleting topic' });
+    }
+});
 
 module.exports = router;

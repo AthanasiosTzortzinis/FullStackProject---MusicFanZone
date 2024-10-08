@@ -1,25 +1,24 @@
-const Comment = require('../models/Comment'); 
+const Comment = require('../models/Comment');
+const Topic = require('../models/Topic');
 const mongoose = require('mongoose');
 
 exports.createComment = async (req, res) => {
-    const { topicId } = req.params; 
-    const { username, content } = req.body; 
+    const { topicId } = req.params;
+    const { username, content } = req.body;
+
+    if (!username || !content) {
+        return res.status(400).json({ error: 'Username and content are required' });
+    }
 
     try {
-        
-        if (!username || !content) {
-            return res.status(400).json({ error: 'Username and content are required' });
-        }
-
         const newComment = new Comment({
             username,
             content,
-            topicId 
+            topicId,
         });
 
-        
         const savedComment = await newComment.save();
-        res.status(201).json(savedComment); 
+        res.status(201).json(savedComment);
     } catch (error) {
         console.error('Error creating comment:', error);
         res.status(500).json({ error: 'Error creating comment' });
@@ -28,10 +27,10 @@ exports.createComment = async (req, res) => {
 
 
 exports.getAllComments = async (req, res) => {
-    const { topicId } = req.params; 
-    console.log('Topic ID:', topicId); 
+    const { topicId } = req.params;
+
     try {
-        const comments = await Comment.find({ topicId }); 
+        const comments = await Comment.find({ topicId });
         if (!comments.length) {
             return res.status(404).json({ error: 'No comments found for this topic' });
         }
@@ -42,16 +41,16 @@ exports.getAllComments = async (req, res) => {
     }
 };
 
+
 exports.getCommentById = async (req, res) => {
-    const { topicId } = req.params; 
+    const { topicId, id } = req.params;
 
     try {
-        
-        const comment = await Comment.findOne({ _id: req.params.id, topicId });
+        const comment = await Comment.findOne({ _id: id, topicId });
         if (!comment) {
             return res.status(404).json({ error: 'Comment not found' });
         }
-        res.status(200).json(comment); 
+        res.status(200).json(comment);
     } catch (error) {
         console.error('Error fetching comment:', error);
         res.status(500).json({ error: 'Error fetching comment' });
@@ -60,20 +59,23 @@ exports.getCommentById = async (req, res) => {
 
 
 exports.updateComment = async (req, res) => {
-    const { topicId } = req.params; 
-    const { content } = req.body; 
+    const { topicId, id } = req.params;
+    const { content } = req.body;
 
     try {
-        
-        const comment = await Comment.findOne({ _id: req.params.id, topicId });
+        const comment = await Comment.findOne({ _id: id, topicId });
 
         if (!comment) {
             return res.status(404).json({ error: 'Comment not found' });
         }
 
         
+        if (comment.username !== req.body.username) {
+            return res.status(403).json({ message: 'You do not have permission to edit this comment.' });
+        }
+
         comment.content = content || comment.content;
-        const updatedComment = await comment.save(); 
+        const updatedComment = await comment.save();
 
         res.status(200).json(updatedComment);
     } catch (error) {
@@ -84,25 +86,27 @@ exports.updateComment = async (req, res) => {
 
 
 exports.deleteComment = async (req, res) => {
-    const { topicId } = req.params; 
-    const { id } = req.params; 
+    const { topicId, id } = req.params;
 
     try {
-        
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ error: 'Invalid comment ID' });
         }
 
-        
-        const comment = await Comment.findOneAndDelete({ _id: id, topicId });
+        const comment = await Comment.findOne({ _id: id, topicId });
 
         if (!comment) {
             return res.status(404).json({ error: 'Comment not found' });
         }
 
-        res.json({ message: 'Comment deleted successfully' }); 
+        if (comment.username !== req.body.username) {
+            return res.status(403).json({ message: 'You do not have permission to delete this comment.' });
+        }
+
+        await comment.remove();
+        res.status(204).json({ message: 'Comment deleted successfully' });
     } catch (error) {
         console.error('Error deleting comment:', error);
-        res.status(500).json({ error: 'Error deleting comment', details: error.message });
+        res.status(500).json({ error: 'Error deleting comment' });
     }
 };
