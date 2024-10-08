@@ -11,13 +11,11 @@ const Forum = () => {
     const [editingCommentContent, setEditingCommentContent] = useState('');
     const [selectedTopicId, setSelectedTopicId] = useState('');
     const [error, setError] = useState(null);
-    const [currentUser, setCurrentUser] = useState(null); 
+    const [currentUser, setCurrentUser] = useState(null);
 
-    
     const getUserFromToken = () => {
         const token = localStorage.getItem('token'); 
         if (token) {
-            
             const payload = JSON.parse(atob(token.split('.')[1])); 
             return { username: payload.username, id: payload.id }; 
         }
@@ -28,9 +26,8 @@ const Forum = () => {
         const user = getUserFromToken();
         if (user) {
             setCurrentUser(user);
+            console.log('Current user:', user); // Debugging line
         }
-
-        // Fetch topics when the component mounts
         fetchTopics();
     }, []);
 
@@ -55,14 +52,15 @@ const Forum = () => {
             return;
         }
 
-        const topicData = { ...newTopic, createdBy: currentUser?.username }; 
+        const topicData = { ...newTopic, createdBy: currentUser?.username };
         try {
             if (editingTopic) {
-                const response = await axios.put(`http://localhost:4000/api/topics/${editingTopic._id}`, topicData); 
+                const response = await axios.put(`http://localhost:4000/api/topics/${editingTopic._id}`, topicData);
                 setTopics(topics.map(topic => (topic._id === editingTopic._id ? response.data : topic)));
                 setEditingTopic(null);
             } else {
-                const response = await axios.post('http://localhost:4000/api/topics', topicData);
+                const response = await axios.post('http://localhost:4000/api/topics', topicData,{headers:{Authorization:`Bearer ${localStorage.getItem("token")}`}});
+                console.log(response.data)
                 setTopics([...topics, response.data]);
                 setSelectedTopicId(response.data._id);
             }
@@ -76,11 +74,14 @@ const Forum = () => {
 
     const deleteTopic = async (topicId) => {
         try {
-            await axios.delete(`http://localhost:4000/api/topics/${topicId}`); // Fixed template literal syntax
+            console.log(topicId)
+            
+            let res = await axios.delete(`http://localhost:4000/api/topics/${topicId}`,{headers:{Authorization:`Bearer ${localStorage.getItem('token')}`}});
+            console.log(res.data)
             setTopics(topics.filter(topic => topic._id !== topicId));
             if (selectedTopicId === topicId) {
                 setSelectedTopicId('');
-                setNewTopic({ title: '', description: '' }); 
+                setNewTopic({ title: '', description: '' });
             }
             setError(null);
         } catch (error) {
@@ -91,7 +92,7 @@ const Forum = () => {
 
     const fetchComments = async (topicId) => {
         try {
-            const response = await axios.get(`http://localhost:4000/api/topics/${topicId}/comments`); 
+            const response = await axios.get(`http://localhost:4000/api/topics/${topicId}/comments`);
             setComments(prev => ({ ...prev, [topicId]: response.data }));
         } catch (error) {
             console.error("Error fetching comments:", error);
@@ -101,9 +102,9 @@ const Forum = () => {
 
     const createComment = async (topicId) => {
         if (!newComment.trim()) return;
-        const commentData = { username: currentUser?.username, content: newComment }; 
+        const commentData = { username: currentUser?.username, content: newComment };
         try {
-            const response = await axios.post(`http://localhost:4000/api/topics/${topicId}/comments`, commentData); 
+            const response = await axios.post(`http://localhost:4000/api/topics/${topicId}/comments`, commentData,{headers:{Authorization:`Bearer ${localStorage.getItem("token")}`}});
             setComments(prev => ({ ...prev, [topicId]: [...(prev[topicId] || []), response.data] }));
             setNewComment('');
             setError(null);
@@ -118,7 +119,7 @@ const Forum = () => {
         try {
             const response = await axios.put(`http://localhost:4000/api/topics/${topicId}/comments/${editingCommentId}`, {
                 content: editingCommentContent
-            }); // Fixed template literal syntax
+            });
             setComments(prev => ({
                 ...prev,
                 [topicId]: prev[topicId].map(comment => (comment._id === editingCommentId ? response.data : comment))
@@ -134,7 +135,7 @@ const Forum = () => {
 
     const deleteComment = async (topicId, commentId) => {
         try {
-            await axios.delete(`http://localhost:4000/api/topics/${topicId}/comments/${commentId}`); // Fixed template literal syntax
+            await axios.delete(`http://localhost:4000/api/topics/${topicId}/comments/${commentId}`);
             setComments(prev => ({
                 ...prev,
                 [topicId]: prev[topicId].filter(comment => comment._id !== commentId)
@@ -154,7 +155,7 @@ const Forum = () => {
             setEditingTopic(null);
         } else {
             setComments({});
-            setNewTopic({ title: '', description: '' }); 
+            setNewTopic({ title: '', description: '' });
         }
     };
 
@@ -242,8 +243,13 @@ const Forum = () => {
                                                 </div>
                                             </div>
 
-                                            <button onClick={() => deleteTopic(selectedTopicId)} style={{ padding: '10px 20px' }}>Delete Topic</button>
-                                            <button onClick={() => handleEditClick(topics.find(topic => topic._id === selectedTopicId))} style={{ padding: '10px 20px', marginLeft: '10px' }}>Edit Topic</button>
+                                            {/* Show edit and delete buttons only for the user who created the topic */}
+                                            {currentUser?.username === topics.find(topic => topic._id === selectedTopicId).createdBy && (
+                                                <>
+                                                    <button onClick={() => deleteTopic(selectedTopicId)} style={{ padding: '10px 20px' }}>Delete Topic</button>
+                                                    <button onClick={() => handleEditClick(topics.find(topic => topic._id === selectedTopicId))} style={{ padding: '10px 20px', marginLeft: '10px' }}>Edit Topic</button>
+                                                </>
+                                            )}
                                         </>
                                     )}
                                 </>
@@ -267,7 +273,7 @@ const Forum = () => {
                                                 <textarea
                                                     value={editingCommentContent}
                                                     onChange={(e) => setEditingCommentContent(e.target.value)}
-                                                    style={{ marginLeft: '10px', padding: '10px', width: '50%', height: '30px' }} 
+                                                    style={{ marginLeft: '10px', padding: '10px', width: '50%', height: '30px' }}
                                                 />
                                                 <button onClick={() => updateComment(selectedTopicId)} style={{ marginLeft: '10px', padding: '5px 10px' }}>Update</button>
                                                 <button onClick={() => setEditingCommentId(null)} style={{ marginLeft: '10px', padding: '5px 10px' }}>Cancel</button>
@@ -275,6 +281,7 @@ const Forum = () => {
                                         ) : (
                                             <>
                                                 <span style={{ marginLeft: '10px' }}>{comment.content}</span>
+                                                {/* Show edit and delete buttons only for the user who created the comment */}
                                                 {currentUser && currentUser.username === comment.username && (
                                                     <>
                                                         <button onClick={() => {
