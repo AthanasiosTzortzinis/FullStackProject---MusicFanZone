@@ -4,14 +4,15 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const axios = require('axios');
-
+const jwt = require("jsonwebtoken")
 const playlistRoutes = require('./routes/playlistRoutes');
 const trackRoutes = require('./routes/trackRoutes');
 const commentsRoutes = require('./routes/commentsRoutes');
 const userRoutes = require('./routes/user');
-const topicRoutes = require('./routes/topicRoutes'); 
+//const topicRoutes = require('./routes/topicRoutes'); 
 const Comment = require('./models/Comment');
 const Topic = require('./models/Topic');
+
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -31,10 +32,34 @@ app.get('/', (req, res) => {
 });
 
 
+
+
+
+const authenticateUser =async  (req, res, next) => {
+    try{
+    const token = req.headers.authorization?.split(' ')[1];
+  
+
+    if (!token) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }else{
+          const payload = await jwt.verify(token, process.env.SECRET_KEY);
+        console.log(payload)
+        req.user = payload; 
+        next();
+    }
+      
+    } catch (error) {
+        console.log(error)
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+};
+
+
 app.use('/user', userRoutes);
 app.use('/playlists', playlistRoutes);
 app.use('/tracks', trackRoutes);
-app.use('/api/topics', topicRoutes);
+//app.use('/api/topics', topicRoutes);
 
 
 const YOUTUBE_BASE_URL = 'https://www.googleapis.com/youtube/v3';
@@ -83,9 +108,10 @@ app.get('/youtube/video/:videoId', async (req, res) => {
 });
 
 // Comments routes
-app.post('/api/topics/:topicId/comments', async (req, res) => {
+app.post('/api/topics/:topicId/comments', authenticateUser,async (req, res) => {
     const { topicId } = req.params;
     const { username, content } = req.body;
+    console.log(topicId)
 
     if (!username || !content) {
         return res.status(400).json({ error: 'Username and content are required' });
@@ -96,6 +122,7 @@ app.post('/api/topics/:topicId/comments', async (req, res) => {
         await newComment.save();
         return res.status(201).json(newComment);
     } catch (error) {
+        console.log(error)
         console.error('Error saving comment:', error);
         return res.status(500).json({ error: 'Error creating comment' });
     }
@@ -157,15 +184,19 @@ app.delete('/api/topics/:topicId/comments/:commentId', async (req, res) => {
 });
 
 
-app.post('/api/topics', async (req, res) => {
+app.post('/api/topics', authenticateUser, async (req, res) => {
+  
     const { title, description } = req.body;
+    console.log(req.user)
+    const createdBy = req.user.username;
+
 
     if (!title || !description) {
         return res.status(400).json({ error: 'Title and description are required' });
     }
 
     try {
-        const newTopic = new Topic({ title, description });
+        const newTopic = new Topic({ title, description,createdBy });
         await newTopic.save();
         return res.status(201).json(newTopic);
     } catch (error) {
@@ -206,6 +237,7 @@ app.put('/api/topics/:topicId', async (req, res) => {
 
 app.delete('/api/topics/:topicId', async (req, res) => {
     const { topicId } = req.params;
+    console.log("delete",topicId)
 
     try {
         const deletedTopic = await Topic.findByIdAndDelete(topicId);
