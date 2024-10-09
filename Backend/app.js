@@ -44,7 +44,6 @@ const authenticateUser =async  (req, res, next) => {
         return res.status(401).json({ error: 'Unauthorized' });
     }else{
           const payload = await jwt.verify(token, process.env.SECRET_KEY);
-        console.log(payload)
         req.user = payload; 
         next();
     }
@@ -111,7 +110,6 @@ app.get('/youtube/video/:videoId', async (req, res) => {
 app.post('/api/topics/:topicId/comments', authenticateUser,async (req, res) => {
     const { topicId } = req.params;
     const { username, content } = req.body;
-    console.log(topicId)
 
     if (!username || !content) {
         return res.status(400).json({ error: 'Username and content are required' });
@@ -187,7 +185,7 @@ app.delete('/api/topics/:topicId/comments/:commentId', async (req, res) => {
 app.post('/api/topics', authenticateUser, async (req, res) => {
   
     const { title, description } = req.body;
-    console.log(req.user)
+    
     const createdBy = req.user.username;
 
 
@@ -237,7 +235,6 @@ app.put('/api/topics/:topicId', async (req, res) => {
 
 app.delete('/api/topics/:topicId', async (req, res) => {
     const { topicId } = req.params;
-    console.log("delete",topicId)
 
     try {
         const deletedTopic = await Topic.findByIdAndDelete(topicId);

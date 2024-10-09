@@ -1,4 +1,3 @@
-// Playlists.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import TrackVideoManager from './TrackVideoManager'; // Import the TrackVideoManager
@@ -76,14 +75,25 @@ const Playlists = () => {
     }
   };
 
+  const handleCancelEdit = () => {
+    setEditingPlaylistId(null);
+    setEditingPlaylistName('');
+  };
+
   const handleDeletePlaylist = async (playlistId) => {
-    try {
-      await axiosInstance.delete(`/playlists/${playlistId}`);
-      setPlaylists(playlists.filter((p) => p._id !== playlistId));
-      setSelectedPlaylist('');
-    } catch (error) {
-      console.error('Error deleting playlist:', error);
-      setError('Failed to delete playlist.');
+    // Prompt the user for confirmation
+    const confirmed = window.confirm('Are you sure you want to delete this playlist?');
+  
+    // If the user clicks 'OK', proceed with deletion
+    if (confirmed) {
+      try {
+        await axiosInstance.delete(`/playlists/${playlistId}`);
+        setPlaylists(playlists.filter((p) => p._id !== playlistId));
+        setSelectedPlaylist('');
+      } catch (error) {
+        console.error('Error deleting playlist:', error);
+        setError('Failed to delete playlist.');
+      }
     }
   };
 
@@ -112,7 +122,8 @@ const Playlists = () => {
                   value={editingPlaylistName} 
                   onChange={(e) => setEditingPlaylistName(e.target.value)}
                 />
-                <button onClick={handleEditPlaylist}>Save</button>
+                <button onClick={handleEditPlaylist}>Update</button>
+                <button onClick={handleCancelEdit}>Cancel</button>
               </>
             ) : (
               <>

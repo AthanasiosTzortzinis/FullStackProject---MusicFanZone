@@ -56,22 +56,27 @@ const TrackVideoManager = ({ playlists, selectedPlaylist, setSelectedPlaylist, s
 
   const handleDeleteTrackFromPlaylist = async (trackId) => {
     if (!selectedPlaylist) return;
-
-    try {
-      await axiosInstance.delete(`/playlists/${selectedPlaylist}/tracks/${trackId}`);
-      const updatedPlaylists = playlists.map((playlist) => {
-        if (playlist._id === selectedPlaylist) {
-          return {
-            ...playlist,
-            tracks: playlist.tracks.filter((track) => track.trackId !== trackId),
-          };
-        }
-        return playlist;
-      });
-      setPlaylists(updatedPlaylists);
-    } catch (error) {
-      console.error('Error deleting track from playlist:', error);
-      setError('Error deleting track from playlist. Please try again.'); // Set error message
+  
+    // Prompt the user for confirmation before deleting the track
+    const confirmed = window.confirm('Are you sure you want to delete this track from the playlist?');
+  
+    if (confirmed) {
+      try {
+        await axiosInstance.delete(`/playlists/${selectedPlaylist}/tracks/${trackId}`);
+        const updatedPlaylists = playlists.map((playlist) => {
+          if (playlist._id === selectedPlaylist) {
+            return {
+              ...playlist,
+              tracks: playlist.tracks.filter((track) => track.trackId !== trackId),
+            };
+          }
+          return playlist;
+        });
+        setPlaylists(updatedPlaylists);
+      } catch (error) {
+        console.error('Error deleting track from playlist:', error);
+        setError('Error deleting track from playlist. Please try again.');
+      }
     }
   };
 
@@ -130,12 +135,12 @@ const TrackVideoManager = ({ playlists, selectedPlaylist, setSelectedPlaylist, s
               <li key={track.trackId}>
                 <span>{track.title}</span>
                 <button onClick={() => toggleListenTrack(track.trackId)}>
-                  {playingTrackId === track.trackId ? 'Hide' : 'Listen'}
+                  {playingTrackId === track.trackId ? 'Hide' : 'Listen / View'}
                 </button>
                 {playingTrackId === track.trackId && (
                   <ReactPlayer url={`https://www.youtube.com/watch?v=${track.trackId}`} playing controls />
                 )}
-                <button onClick={() => handleDeleteTrackFromPlaylist(track.trackId)}>Delete Track</button>
+                <button onClick={() => handleDeleteTrackFromPlaylist(track.trackId)}>Delete</button>
               </li>
             ))}
           </ul>

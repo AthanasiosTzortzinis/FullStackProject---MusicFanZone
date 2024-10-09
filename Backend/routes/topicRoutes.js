@@ -67,7 +67,6 @@ router.put('/:topicId', authenticateUser, async (req, res) => {
 router.delete('/:topicId', authenticateUser, async (req, res) => {
  
     const { topicId } = req.params;
-    console.log("topicId",topicId)
 
     try {
         const deletedTopic = await Topic.findOneAndDelete({ _id: topicId, createdBy: req.user.username }); 
