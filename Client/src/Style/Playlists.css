@@ -1,0 +1,153 @@
+
+.playlists-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    min-height: 100vh;
+    font-family: 'Arial', sans-serif; 
+}
+
+
+h1 {
+    color: #333;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+.create-playlist {
+    display: flex;
+    margin-bottom: 30px;
+}
+
+.create-playlist input {
+    padding: 12px; 
+    border: 1px solid #0a131c; 
+    border-radius: 5px;
+    width: 270px; 
+    margin-right: 10px;
+    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.1); 
+    box-sizing: border-box; 
+    height: 50px; 
+    background-color: #e1e9ee;
+}
+
+.create-playlist button {
+    padding: 0 20px; 
+    height: 49px; 
+    background-color: #4d7197; 
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2); 
+    box-sizing: border-box; 
+    margin-top: 5px; 
+}
+
+
+.create-playlist button:hover {
+    background-color: #06488e; 
+}
+
+
+.error-message {
+    color: #dc3545; 
+    margin: 10px 0;
+    font-weight: bold; 
+}
+
+
+.playlists-list {
+    width: 100%;
+    max-width: 600px; 
+}
+
+.playlists-list ul {
+    list-style-type: none; 
+    padding: 0; 
+}
+
+
+.playlist-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f3e9e9; 
+    border: 1px solid #161515; 
+    border-radius: 5px; 
+    margin: 0 auto 15px; 
+    width: 80%; 
+    max-width: 500px; 
+    transition: box-shadow 0.3s ease; 
+}
+
+
+.playlist-item:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
+}
+
+
+.playlist-name {
+    cursor: pointer; 
+    color: #32363c; 
+    text-decoration: underline; 
+    font-weight: bold; 
+}
+
+
+.editing-input {
+    width: 200px; 
+    padding: 8px;
+    margin-right: 10px;
+    border: 1px solid #007bff; 
+    border-radius: 5px;
+}
+
+
+.edit-button,
+.delete-button,
+.cancel-button {
+    padding: 4px 10px; 
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-left: 5px; 
+    font-size: 0.9rem; 
+}
+
+
+.edit-button {
+    width: 80px; 
+    background-color: #28a745;
+    color: white;
+    margin-right: 10px; 
+}
+
+.delete-button {
+    width: 80px; 
+    background-color: #dc3545; 
+    color: white;
+}
+
+.cancel-button {
+    width: 80px; 
+    background-color: #ffc107; 
+    color: black;
+}
+
+
+.edit-button:hover {
+    background-color: #218838; 
+}
+
+.delete-button:hover {
+    background-color: #c82333; 
+}
+
+.cancel-button:hover {
+    background-color: #e0a800; 
+}

@@ -1,0 +1,32 @@
+body {
+    background-color: #dcd5d4;
+}
+ 
+.login-message {
+    font-size: 20px; /* Change this to your desired font size */
+    font-weight: bold; /* Make the text bold */
+    color: #FF0000; /* Change to a color that stands out, e.g., red */
+    text-align: center; /* Center the text */
+    margin-top: 20px; /* Add some space above */
+}
+
+/* Styling for the login required messages in Playlists and Forum */
+.login-required-message {
+    font-size: 24px; /* Increase the font size */
+    font-weight: bold; /* Make the text bold */
+    color: #FF4500; /* Change to a bright orange color */
+    text-align: center; /* Center the text */
+    margin-top: 20px; /* Add some space above */
+}
+
+.login-required-link {
+    font-size: 20px; /* Font size for the link */
+    color: #2979ce; /* Link color */
+    text-decoration: underline; /* Underline the link */
+    cursor: pointer; /* Pointer cursor on hover */
+}
+
+/* Optional: Add hover effect for the link */
+.login-required-link:hover {
+    color: #0056b3; /* Darken the link color on hover */
+}

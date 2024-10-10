@@ -1,0 +1,65 @@
+.home-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start; 
+    text-align: center;
+    padding: 20px;
+    height: 100vh; 
+    box-sizing: border-box;
+    background-color: #dcd5d4;
+    background-image: url('../Image/aural-1297838_1280.png'), url('../Image/aural-1297838_1280.png'); 
+    background-size: 20% 60%;
+    background-repeat: no-repeat; 
+    background-position: left, right;
+    margin-top: 1px; 
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+
+@keyframes fadeInOut {
+    0%, 100% {
+        opacity: 0; 
+    }
+    50% {
+        opacity: 1; 
+    }
+}
+
+
+.home-container::after {
+    content: ""; 
+    display: block; 
+    background-image: url('../Image/ekg-8143889_1280.png'); 
+    background-size: contain; 
+    background-repeat: no-repeat; 
+    background-position: center; 
+    width: 90%; 
+    height: 200px; 
+    margin: 20px 0; 
+    
+   
+    opacity: 0; 
+    animation: fadeInOut 4s infinite; 
+}
+
+
+.welcome-message {
+    font-family: 'UnifrakturMaguntia'; 
+    font-size: 2.2rem; 
+    color: #2c3e50; 
+    margin-top: 20px;
+    text-shadow: 1px 1px 10px rgba(207, 63, 63, 0.5); 
+    letter-spacing: 2px; 
+    text-transform: uppercase; 
+}
+
+.about-text {
+    font-family: 'Arial', sans-serif;
+    font-size: 1.2rem;
+    color: #ba3f3f;
+    max-width: 800px;
+    line-height: 1.6;
+    margin-top: 20px;
+}
