@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import '../Style/Forum.css';
 
 const Forum = () => {
     const [topics, setTopics] = useState([]);
@@ -13,34 +14,36 @@ const Forum = () => {
     const [error, setError] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
 
+    // Retrieve the user info from the token stored in localStorage
     const getUserFromToken = () => {
-        const token = localStorage.getItem('token'); 
+        const token = localStorage.getItem('token');
         if (token) {
-            const payload = JSON.parse(atob(token.split('.')[1])); 
-            return { username: payload.username, id: payload.id }; 
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return { username: payload.username, id: payload.id };
         }
-        return null; 
+        return null;
     };
 
+    // Fetch topics and set the current user when the component loads
     useEffect(() => {
         const user = getUserFromToken();
         if (user) {
             setCurrentUser(user);
-            console.log('Current user:', user); // Debugging line
         }
         fetchTopics();
     }, []);
 
+    // Fetch the list of topics from the backend
     const fetchTopics = async () => {
         try {
             const response = await axios.get('http://localhost:4000/api/topics');
             setTopics(response.data);
         } catch (error) {
-            console.error("Error fetching topics:", error);
             setError("Could not load topics. Please try again later.");
         }
     };
 
+    // Create or update a topic
     const createOrUpdateTopic = async () => {
         if (!newTopic.title.trim()) {
             setError("Please provide a title for the topic.");
@@ -52,36 +55,36 @@ const Forum = () => {
             return;
         }
 
-        const topicData = { ...newTopic, createdBy: currentUser?.username };
+        const topicData = { ...newTopic, createdBy: currentUser?.username, createdAt: new Date() };
+
         try {
             if (editingTopic) {
                 const response = await axios.put(`http://localhost:4000/api/topics/${editingTopic._id}`, topicData);
                 setTopics(topics.map(topic => (topic._id === editingTopic._id ? response.data : topic)));
                 setEditingTopic(null);
             } else {
-                const response = await axios.post('http://localhost:4000/api/topics', topicData,{headers:{Authorization:`Bearer ${localStorage.getItem("token")}`}});
-                console.log(response.data)
+                const response = await axios.post('http://localhost:4000/api/topics', topicData, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+                });
                 setTopics([...topics, response.data]);
                 setSelectedTopicId(response.data._id);
             }
             setNewTopic({ title: '', description: '' });
             setError(null);
         } catch (error) {
-            console.error("Error saving topic:", error);
             setError("Failed to save topic. Please try again.");
         }
     };
 
+    // Delete a topic
     const deleteTopic = async (topicId) => {
-        const confirmDelete = window.confirm("Are you sure you want to delete this topic?"); // Prompt for topic deletion
-        if (!confirmDelete) return; // If the user cancels, do nothing
-    
+        const confirmDelete = window.confirm("Are you sure you want to delete this topic?");
+        if (!confirmDelete) return;
+
         try {
-            console.log(topicId);
-            let res = await axios.delete(`http://localhost:4000/api/topics/${topicId}`, {
+            await axios.delete(`http://localhost:4000/api/topics/${topicId}`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
-            console.log(res.data);
             setTopics(topics.filter(topic => topic._id !== topicId));
             if (selectedTopicId === topicId) {
                 setSelectedTopicId('');
@@ -89,41 +92,56 @@ const Forum = () => {
             }
             setError(null);
         } catch (error) {
-            console.error("Error deleting topic:", error);
             setError("Failed to delete topic. Please try again.");
         }
     };
-    
 
+    // Fetch comments for a selected topic
     const fetchComments = async (topicId) => {
         try {
             const response = await axios.get(`http://localhost:4000/api/topics/${topicId}/comments`);
             setComments(prev => ({ ...prev, [topicId]: response.data }));
         } catch (error) {
-            console.error("Error fetching comments:", error);
             setError("Could not load comments. Please try again.");
         }
     };
 
+    // Create a new comment for a selected topic
     const createComment = async (topicId) => {
         if (!newComment.trim()) return;
-        const commentData = { username: currentUser?.username, content: newComment };
+
+        const commentData = {
+            username: currentUser?.username,
+            content: newComment,
+            createdAt: new Date()
+        };
+
         try {
-            const response = await axios.post(`http://localhost:4000/api/topics/${topicId}/comments`, commentData,{headers:{Authorization:`Bearer ${localStorage.getItem("token")}`}});
-            setComments(prev => ({ ...prev, [topicId]: [...(prev[topicId] || []), response.data] }));
+            const response = await axios.post(`http://localhost:4000/api/topics/${topicId}/comments`, commentData, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`
+                }
+            });
+            setComments(prev => ({
+                ...prev,
+                [topicId]: [...(prev[topicId] || []), response.data]
+            }));
             setNewComment('');
             setError(null);
         } catch (error) {
-            console.error('Error creating comment:', error);
             setError("Failed to create comment. Please try again.");
+            console.error(error);
         }
     };
 
+    // Update an existing comment
     const updateComment = async (topicId) => {
         if (!editingCommentContent.trim()) return;
+
         try {
             const response = await axios.put(`http://localhost:4000/api/topics/${topicId}/comments/${editingCommentId}`, {
-                content: editingCommentContent
+                content: editingCommentContent,
+                createdAt: new Date()
             });
             setComments(prev => ({
                 ...prev,
@@ -133,15 +151,15 @@ const Forum = () => {
             setEditingCommentContent('');
             setError(null);
         } catch (error) {
-            console.error('Error updating comment:', error);
             setError("Failed to update comment. Please try again.");
         }
     };
 
+    // Delete a comment
     const deleteComment = async (topicId, commentId) => {
-        const confirmDelete = window.confirm("Are you sure you want to delete this comment?"); // Prompt for comment deletion
-        if (!confirmDelete) return; // If the user cancels, do nothing
-    
+        const confirmDelete = window.confirm("Are you sure you want to delete this comment?");
+        if (!confirmDelete) return;
+
         try {
             await axios.delete(`http://localhost:4000/api/topics/${topicId}/comments/${commentId}`);
             setComments(prev => ({
@@ -150,11 +168,11 @@ const Forum = () => {
             }));
             setError(null);
         } catch (error) {
-            console.error("Error deleting comment:", error);
             setError("Failed to delete comment. Please try again.");
         }
     };
 
+    // Handle topic selection
     const handleTopicChange = (e) => {
         const topicId = e.target.value;
         setSelectedTopicId(topicId);
@@ -167,45 +185,50 @@ const Forum = () => {
         }
     };
 
+    // Start editing a topic
     const handleEditClick = (topic) => {
         setEditingTopic(topic);
         setNewTopic({ title: topic.title, description: topic.description });
     };
-    
+
+    // Format the timestamp to a readable string
+    const formatTimestamp = (timestamp) => {
+        const date = new Date(timestamp);
+        return date.toLocaleString(); // Formats the timestamp as a readable date and time
+    };
 
     return (
-        <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
-            <h2 style={{ textAlign: 'center' }}>Join the Discussion!</h2>
-            {error && <div style={{ color: 'red', textAlign: 'center' }}>{error}</div>}
+        <div className="forum-container">
+            <h2 className="forum-title">Join the Discussion!</h2>
+            {error && <div className="error-message">{error}</div>}
 
             {currentUser && (
-    <>
-        <h3>Create a New Topic</h3>
-        <div style={{ marginBottom: '20px' }}>
-            <input
-                type="text"
-                placeholder="Title"
-                value={newTopic.title}
-                onChange={(e) => setNewTopic({ ...newTopic, title: e.target.value })}
-                style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
-            />
-            <textarea
-                placeholder="Description"
-                value={newTopic.description}
-                onChange={(e) => setNewTopic({ ...newTopic, description: e.target.value })}
-                style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
-            />
-            <button onClick={createOrUpdateTopic} style={{ padding: '10px 20px' }}>
-                Create Topic
-            </button>
-        </div>
+                <>
+                    <h3 className="create-topic-title">Create a New Topic</h3>
+                    <div className="create-topic-form">
+                        <input
+                            type="text"
+                            placeholder="Title"
+                            value={newTopic.title}
+                            onChange={(e) => setNewTopic({ ...newTopic, title: e.target.value })}
+                            className="topic-input"
+                        />
+                        <textarea
+                            placeholder="Description"
+                            value={newTopic.description}
+                            onChange={(e) => setNewTopic({ ...newTopic, description: e.target.value })}
+                            className="topic-textarea"
+                        />
+                        <button onClick={createOrUpdateTopic} className="topic-button">
+                            {editingTopic ? "Save Changes" : "Create Topic"}
+                        </button>
+                    </div>
 
-
-                    <h3>Choose a Topic</h3>
+                    <h3 className="choose-topic-title">Choose a Topic</h3>
                     <select
                         value={selectedTopicId}
                         onChange={handleTopicChange}
-                        style={{ width: '100%', padding: '10px', marginBottom: '20px' }}
+                        className="topic-select"
                     >
                         <option value="">Select a topic</option>
                         {topics.map(topic => (
@@ -214,115 +237,102 @@ const Forum = () => {
                     </select>
 
                     {selectedTopicId && (
-                        <div>
+                        <div className="topic-details">
                             <h3>Topic Details</h3>
                             {topics.find(topic => topic._id === selectedTopicId) && (
                                 <>
                                     {editingTopic ? (
-    <>
-        <h4>Edit Topic</h4>
-        <div style={{ marginBottom: '10px' }}>
-            <label htmlFor="editTitle" style={{ display: 'block', marginBottom: '5px' }}>Title:</label>
+                                        <>
+                                             <h4 className='edit-label'>Edit Topic</h4>
+        <div className="edit-topic-form">
+            <label htmlFor="editTitle" className="edit-label">Title</label>
             <input
-                id="editTitle"  // Added id for accessibility
+                id="editTitle"
                 value={newTopic.title}
                 onChange={(e) => setNewTopic({ ...newTopic, title: e.target.value })}
-                style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
+                className="topic-input"
             />
-        </div>
-        <div style={{ marginBottom: '10px' }}>
-            <label htmlFor="editDescription" style={{ display: 'block', marginBottom: '5px' }}>Description:</label>
+            <label htmlFor="editDescription" className="edit-label">Description</label>
             <textarea
-                id="editDescription" // Added id for accessibility
+                id="editDescription"
                 value={newTopic.description}
                 onChange={(e) => setNewTopic({ ...newTopic, description: e.target.value })}
-                style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
-            />
-        </div>
-        <button onClick={createOrUpdateTopic} style={{ padding: '10px 20px' }}>Update Topic</button>
-        <button onClick={() => setEditingTopic(null)} style={{ padding: '10px 20px', marginLeft: '10px' }}>Cancel</button>
-    </>
-) : (
-                                        <>
-                                            <div style={{ marginBottom: '10px' }}>
-                                                <div style={{ marginBottom: '5px' }}>
-                                                    <strong>Title: </strong>
-                                                    <span>{topics.find(topic => topic._id === selectedTopicId).title}</span>
-                                                </div>
-
-                                                <div style={{ marginBottom: '5px' }}>
-                                                    <strong>Description: </strong>
-                                                    <span>{topics.find(topic => topic._id === selectedTopicId).description}</span>
-                                                </div>
-
-                                                <div style={{ marginBottom: '5px' }}>
-                                                    <strong>Created By: </strong>
-                                                    <span>{topics.find(topic => topic._id === selectedTopicId).createdBy}</span>
-                                                </div>
-
-                                                <div style={{ marginBottom: '5px' }}>
-                                                <strong>Created At: </strong>
-                                                <span>{new Date(topics.find(topic => topic._id === selectedTopicId).createdAt).toLocaleString()}</span>
-                                                </div>
+                className="topic-textarea"
+                                                />
                                             </div>
-
-                                            {/* Show edit and delete buttons only for the user who created the topic */}
+                                            <div className="edit-actions">
+                                                <button onClick={createOrUpdateTopic} className="topic-button">Save Changes</button>
+                                                <button onClick={() => setEditingTopic(null)} className="topic-button cancel">Cancel</button>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <p><strong>Title:</strong> {topics.find(topic => topic._id === selectedTopicId).title}</p>
+                                            <p><strong>Description:</strong> {topics.find(topic => topic._id === selectedTopicId).description}</p>
+                                            <p><strong>Created by:</strong> {topics.find(topic => topic._id === selectedTopicId).createdBy}</p>
+                                            <p><strong>Created at:</strong> {formatTimestamp(topics.find(topic => topic._id === selectedTopicId).createdAt)}</p>
+                                            {/* Conditional rendering for Edit/Delete buttons */}
                                             {currentUser?.username === topics.find(topic => topic._id === selectedTopicId).createdBy && (
                                                 <>
-                                                    <button onClick={() => deleteTopic(selectedTopicId)} style={{ padding: '10px 20px' }}>Delete Topic</button>
-                                                    <button onClick={() => handleEditClick(topics.find(topic => topic._id === selectedTopicId))} style={{ padding: '10px 20px', marginLeft: '10px' }}>Edit Topic</button>
+                                                    <button onClick={() => deleteTopic(selectedTopicId)} className="topic-button delete">Delete Topic</button>
+                                                    <button onClick={() => handleEditClick(topics.find(topic => topic._id === selectedTopicId))} className="topic-button edit">Edit Topic</button>
                                                 </>
                                             )}
                                         </>
                                     )}
                                 </>
                             )}
-
-                            <h4>Comments</h4>
-                            <textarea
-                                placeholder="Add a comment..."
-                                value={newComment}
-                                onChange={(e) => setNewComment(e.target.value)}
-                                style={{ width: '100%', marginBottom: '10px', padding: '10px' }}
-                            />
-                            <button onClick={() => createComment(selectedTopicId)} style={{ padding: '10px 20px' }}>Add Comment</button>
-
-                            <div>
-                            {comments[selectedTopicId]?.map(comment => (
-    <div key={comment._id} style={{ borderBottom: '1px solid #ccc', marginBottom: '10px', paddingBottom: '10px', display: 'flex', alignItems: 'center' }}>
-        <strong>{comment.username}:</strong>
-        {editingCommentId === comment._id ? (
-            <>
-                <textarea
-                    value={editingCommentContent}
-                    onChange={(e) => setEditingCommentContent(e.target.value)}
-                    style={{ marginLeft: '10px', padding: '10px', width: '50%', height: '30px' }}
-                />
-                <button onClick={() => updateComment(selectedTopicId)} style={{ marginLeft: '10px', padding: '5px 10px' }}>Update</button>
-                <button onClick={() => setEditingCommentId(null)} style={{ marginLeft: '10px', padding: '5px 10px' }}>Cancel</button>
-            </>
-        ) : (
-            <>
-                <span style={{ marginLeft: '10px' }}>{comment.content}</span>
-                {/* Add this line to display the createdAt timestamp */}
-                <span style={{ marginLeft: '10px', fontSize: 'smaller', color: '#777' }}>
-                    (Sent at: {new Date(comment.createdAt).toLocaleString()})
-                </span>
-                {currentUser && currentUser.username === comment.username && (
-                    <>
-                        <button onClick={() => {
-                            setEditingCommentId(comment._id);
-                            setEditingCommentContent(comment.content);
-                        }} style={{ marginLeft: '10px', padding: '5px 10px' }}>Edit</button>
-                        <button onClick={() => deleteComment(selectedTopicId, comment._id)} style={{ marginLeft: '10px', padding: '5px 10px' }}>Delete</button>
-                    </>
-                )}
-            </>
-        )}
-    </div>
-    )) || <p>No comments yet. Be the first to comment!</p>}
-                            </div>
                         </div>
+                    )}
+
+                    {selectedTopicId && (
+                        <>
+                            <h3 className="comments-title">Comments</h3>
+                            <div className="comment-form">
+                                <textarea
+                                    placeholder="Add a comment..."
+                                    value={newComment}
+                                    onChange={(e) => setNewComment(e.target.value)}
+                                    className="comment-textarea"
+                                />
+                                <button onClick={() => createComment(selectedTopicId)} className="comment-button">Post Comment</button>
+                            </div>
+                            <div className="comments-list">
+                                {comments[selectedTopicId]?.map(comment => (
+                                    <div key={comment._id} className="comment">
+                                        <div className="comment-author">{comment.username}</div>
+                                        {editingCommentId === comment._id ? (
+                                            <div className="edit-comment-form">
+                                                <textarea
+                                                    value={editingCommentContent}
+                                                    onChange={(e) => setEditingCommentContent(e.target.value)}
+                                                    className="comment-textarea"
+                                                />
+                                                <button onClick={() => updateComment(selectedTopicId)} className="comment-button">Update</button>
+                                                <button onClick={() => setEditingCommentId(null)} className="comment-button cancel">Cancel</button>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="comment-content">{comment.content}</div>
+                                                <div className="comment-timestamp">{formatTimestamp(comment.createdAt)}</div> {/* Timestamp */}
+                                            </>
+                                        )}
+                                        <div className="comment-actions">
+                                            {/* Conditional rendering for Edit/Delete buttons */}
+                                            {currentUser?.username === comment.username && (
+                                                <>
+                                                    <button onClick={() => {
+                                                        setEditingCommentId(comment._id);
+                                                        setEditingCommentContent(comment.content);
+                                                    }} className="comment-button edit">Edit</button>
+                                                    <button onClick={() => deleteComment(selectedTopicId, comment._id)} className="comment-button delete">Delete</button>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
                     )}
                 </>
             )}
