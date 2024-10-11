@@ -1,32 +1,78 @@
-body {
-    background-color: #dcd5d4;
-}
- 
-.login-message {
-    font-size: 20px; /* Change this to your desired font size */
-    font-weight: bold; /* Make the text bold */
-    color: #FF0000; /* Change to a color that stands out, e.g., red */
-    text-align: center; /* Center the text */
-    margin-top: 20px; /* Add some space above */
+
+.login-required-message {
+    text-align: center;
+    margin: 40px auto;
+    padding: 20px;
+    max-width: 700px;
+    border: 1px solid #ccc;
+    border-radius: 70px;
+    background-color: #f9f9f9;
 }
 
-/* Styling for the login required messages in Playlists and Forum */
-.login-required-message {
-    font-size: 24px; /* Increase the font size */
-    font-weight: bold; /* Make the text bold */
-    color: #FF4500; /* Change to a bright orange color */
-    text-align: center; /* Center the text */
-    margin-top: 20px; /* Add some space above */
+.additional-message {
+    font-size: 22px;
+    font-weight: bold;
+    color: black;
+    margin-bottom: 20px;
+}
+
+.login-prompt {
+    font-size: 21px;
+    font-weight: bold;
+    color: #FF4500;
+    margin-bottom: 20px;
+    margin-top: 60px;
 }
 
 .login-required-link {
-    font-size: 20px; /* Font size for the link */
-    color: #2979ce; /* Link color */
-    text-decoration: underline; /* Underline the link */
-    cursor: pointer; /* Pointer cursor on hover */
+    font-size: 18px;
+    color: #2979ce;
+    text-decoration: none;
+    cursor: pointer;
+    display: inline-block;
+    margin-top: 20px;
+    position: relative;    
 }
 
-/* Optional: Add hover effect for the link */
-.login-required-link:hover {
-    color: #0056b3; /* Darken the link color on hover */
+.login-required-link::after {
+    content: '⮝'; 
+    display: block; 
+    font-size: 36px; 
+    color: red; 
+    text-align: center; 
+    transform: translateY(20px); 
+    opacity: 0; 
+    animation: slideUp 2s infinite; 
+}
+
+@keyframes slideUp {
+    0% {
+        transform: translateY(20px); 
+        opacity: 0; 
+    }
+    10% {
+        transform: translateY(0); 
+        opacity: 1; 
+    }
+    90% {
+        transform: translateY(0); 
+        opacity: 1; 
+    }
+    100% {
+        transform: translateY(20px); 
+        opacity: 0; 
+    }
+}
+
+.login-message {
+    font-size: 24px; 
+    font-weight: bold; 
+    color: #FF0000; 
+    text-align: center; 
+    margin: 20px auto; 
+    padding: 15px; 
+    background-color: #fff5f5; 
+    border: 1px solid #FF0000; 
+    border-radius: 5px; 
+    max-width: 600px; 
 }

@@ -7,6 +7,22 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+.comments-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+    margin-top: 20px;
+}
+
+.comments-title {
+    font-size: 2rem;
+    color: #1a1717;
+    margin: 0;
+    text-align: left;
+    padding-top: 20px;
+}
+
 .forum-title {
     text-align: center;
     font-size: 2rem;
@@ -82,18 +98,18 @@
 }
 
 .topic-button.cancel {
-    background-color: #6c757d;
+    background-color:   #007bff;
 }
 
 .topic-button.cancel:hover {
-    background-color: #5a6268;
+    background-color:#0056b3;
 }
 
 .choose-topic-title {
     font-size: 1.5rem;
     margin-bottom: 10px;
     text-align: center;
-    margin-top: 70px;
+    margin-top: 40px;
     color: #444;
 }
 
@@ -116,9 +132,9 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
     width: 100%;
-    max-width: 7000px;
     box-sizing: border-box;
     overflow: hidden;
+    margin-top: 30px;
 }
 
 .topic-details p {
@@ -129,12 +145,12 @@
 }
 
 .topic-details h3 {
-    font-size: 1.75rem; 
-    color: #380404; 
+    font-size: 1.8rem; 
+    color: #1a1717; 
     margin-bottom: 15px; 
     border-bottom: 2px solid #007bff; 
     padding-bottom: 15px; 
-    text-align: center;
+    text-align: left;
 }
 
 .centered {
@@ -165,30 +181,6 @@
     width: 100%; 
 }
 
-.topic-input,
-.topic-textarea {
-    width: 410px; 
-    padding: 10px;
-    margin-top: 5px; 
-    box-sizing: border-box; 
-}
-
-.topic-input::placeholder,
-.topic-textarea::placeholder {
-    position: absolute; 
-    left: 10px; 
-    top: 50%; 
-    transform: translateY(-50%); 
-    color: #999; 
-    opacity: 1; 
-}
-
-.topic-input,
-.topic-textarea {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
 .topic-input:focus,
 .topic-textarea:focus {
     border-color: #007BFF; 
@@ -199,13 +191,25 @@
     font-weight: bold;
 }
 
+/* Comment Section */
 .comments-section {
-    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+}
+
+.comments-title {
+    font-size: 1.8rem; 
+    color: #1a1717; 
+    margin-right: 1px;
+    padding-top: 16px;
 }
 
 .comments-section h4 {
     font-size: 1.25rem;
     margin-bottom: 10px;
+
 }
 
 .new-comment-form,
@@ -214,7 +218,8 @@
 }
 
 .comment-textarea {
-    width: 100%;
+    width: 100%; 
+    max-width: 780px;
     padding: 10px;
     font-size: 1rem;
     border: 1px solid #ddd;
@@ -223,7 +228,7 @@
 }
 
 .comment-button {
-    background-color: #28a745;
+    background-color:  #007bff;
     color: white;
     border: none;
     padding: 10px;
@@ -231,37 +236,48 @@
     cursor: pointer;
     font-size: 1rem;
     margin-top: 10px;
+    width: 150px;
 }
 
 .comment-button:hover {
-    background-color: #218838;
+    background-color:  #0056b3;
 }
 
 .comment {
-    background-color: #fff;
-    padding: 10px;
-    margin-bottom: 15px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+    background-color: #fff;                
+    padding: 10px;                         
+    margin-bottom: 20px;                   
+    border: none;                          
+    border-radius: 10px;                   
+    box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.2);  
 }
 
 .comment-author {
     font-weight: bold;
     margin-bottom: 5px;
+    font-size: 0.875rem; /* Ensure this is defined */
+}
+
+.comment-timestamp {
+    margin-left: 5px;
+    font-size: 0.875rem;
+    color: gray; /* Make sure this color is set */
 }
 
 .comment-content {
     margin-bottom: 10px;
-}
-
-.comment-timestamp {
-    font-size: 0.875rem;
-    color: #666;
+    font-size: 1.1rem; 
+    color: #a03232; 
 }
 
 .edit-comment-form {
     margin-bottom: 10px;
+    width: 400px; 
+    max-width: 100%;
+}
+
+.comment-button.cancel {
+  margin-left: 10px;
 }
 
 .comment-actions {
@@ -270,15 +286,17 @@
 }
 
 .comment-button.edit {
-    background-color: #ffc107;
+    background-color: #007bff;
+    width: 150px;
 }
 
 .comment-button.edit:hover {
-    background-color: #e0a800;
+    background-color: #0056b3;
 }
 
 .comment-button.delete {
     background-color: #dc3545;
+    width: 150px;
 }
 
 .comment-button.delete:hover {
@@ -324,6 +342,13 @@
 
 .edit-action-button.delete:hover {
     background-color: #c9302c; 
+}
+
+.comment-author-timestamp {
+    display: inline-block; 
+    margin-bottom: 16px; 
+    color: #120f0f;
+    font-size: 21px;
 }
 
 @media (max-width: 600px) {

@@ -8,15 +8,30 @@ import Login from './Components/Login';
 import Home from './Components/Home';
 import '../src/Style/App.css';
 
+const LoginRequiredMessage = ({ redirectPath, additionalMessage, setRedirectPath }) => (
+  <div className="login-required-message">
+    {additionalMessage && (
+      <p className="additional-message">{additionalMessage}</p>
+    )}
+    <p className="login-prompt">You need to log in to view this content.</p>
+    <Link 
+      to="/login" 
+      className="login-required-link" 
+      onClick={() => setRedirectPath(redirectPath)}
+    >
+      Go to Login
+    </Link>
+  </div>
+);
+
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginMessage, setLoginMessage] = useState("");
-  const [redirectPath, setRedirectPath] = useState('/'); // Default redirect path
+  const [redirectPath, setRedirectPath] = useState('/'); 
 
   useEffect(() => {
-    // Check for a token in localStorage to set login state
     const token = localStorage.getItem('token');
-    setIsLoggedIn(!!token); // Update isLoggedIn based on token presence
+    setIsLoggedIn(!!token); 
   }, []);
 
   const handleLogout = () => {
@@ -24,7 +39,6 @@ function App() {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
     setLoginMessage("You have logged out successfully.");
-
     setTimeout(() => {
       setLoginMessage("");
     }, 5000); 
@@ -41,37 +55,42 @@ function App() {
           element={<Login setIsLoggedIn={setIsLoggedIn} setLoginMessage={setLoginMessage} redirectPath={redirectPath} />} 
         />
         <Route 
-  path="/playlists" 
-  element={
-    isLoggedIn ? (
-      <Playlists />
-    ) : (
-      <div className="login-required-message">
-        <p>You need to log in to view Playlists.</p>
-        <Link to="/login" className="login-required-link" onClick={() => setRedirectPath('/playlists')}>Go to Login</Link>
-      </div>
-    )
-  } 
-/>
-<Route 
-  path="/forum" 
-  element={
-    isLoggedIn ? (
-      <Forum />
-    ) : (
-      <div className="login-required-message">
-        <p>You need to log in to view the Forum.</p>
-        <Link to="/login" className="login-required-link" onClick={() => setRedirectPath('/forum')}>Go to Login</Link>
-      </div>
-    )
-  } 
-/>
-
+          path="/playlists" 
+          element={
+            isLoggedIn ? (
+              <Playlists />
+            ) : (
+              <LoginRequiredMessage 
+                redirectPath="/playlists" 
+                additionalMessage="Unlock the full potential of your music experience in the Music Fan Zone! Here, you have the power to curate your own unique playlists tailored to your tastes. Discover new artists, dive deep into your favorite genres, and enjoy seamless access to music videos through integrated YouTube links. Whether you're throwing a party, winding down after a long day, or simply exploring new sounds, your personalized playlist is just a click away!" 
+                setRedirectPath={setRedirectPath} 
+              />
+            )
+          } 
+        />
+        <Route 
+          path="/forum" 
+          element={
+            isLoggedIn ? (
+              <Forum />
+            ) : (
+              <LoginRequiredMessage 
+                redirectPath="/forum" 
+                additionalMessage="Join the vibrant Music Fan Zone community! Our interactive forum is the perfect space for music lovers to connect, share insights, and discuss everything from the latest hits to hidden gems. Participate in lively debates, share your thoughts, and find recommendations from fellow enthusiasts. Together, we can celebrate our love for music and explore diverse opinions on artists, genres, and trends. Engage, inspire, and be inspired!" 
+                setRedirectPath={setRedirectPath} 
+              />
+            )
+          } 
+        />
         <Route path="/register" element={<Register />} />
       </Routes>
 
       {/* Display Login Message */}
-      {loginMessage && <div className="login-message">{loginMessage}</div>}
+      {loginMessage && (
+        <div className="login-message">
+          {loginMessage}
+        </div>
+      )}
     </Router>
   );
 }

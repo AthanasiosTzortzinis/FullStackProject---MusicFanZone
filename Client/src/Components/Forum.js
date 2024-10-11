@@ -14,7 +14,7 @@ const Forum = () => {
     const [error, setError] = useState(null);
     const [currentUser, setCurrentUser] = useState(null);
 
-    // Retrieve the user info from the token stored in localStorage
+   
     const getUserFromToken = () => {
         const token = localStorage.getItem('token');
         if (token) {
@@ -24,7 +24,7 @@ const Forum = () => {
         return null;
     };
 
-    // Fetch topics and set the current user when the component loads
+    
     useEffect(() => {
         const user = getUserFromToken();
         if (user) {
@@ -33,7 +33,7 @@ const Forum = () => {
         fetchTopics();
     }, []);
 
-    // Fetch the list of topics from the backend
+    
     const fetchTopics = async () => {
         try {
             const response = await axios.get('http://localhost:4000/api/topics');
@@ -43,7 +43,7 @@ const Forum = () => {
         }
     };
 
-    // Create or update a topic
+    
     const createOrUpdateTopic = async () => {
         if (!newTopic.title.trim()) {
             setError("Please provide a title for the topic.");
@@ -76,7 +76,7 @@ const Forum = () => {
         }
     };
 
-    // Delete a topic
+    
     const deleteTopic = async (topicId) => {
         const confirmDelete = window.confirm("Are you sure you want to delete this topic?");
         if (!confirmDelete) return;
@@ -96,7 +96,7 @@ const Forum = () => {
         }
     };
 
-    // Fetch comments for a selected topic
+   
     const fetchComments = async (topicId) => {
         try {
             const response = await axios.get(`http://localhost:4000/api/topics/${topicId}/comments`);
@@ -106,7 +106,7 @@ const Forum = () => {
         }
     };
 
-    // Create a new comment for a selected topic
+    
     const createComment = async (topicId) => {
         if (!newComment.trim()) return;
 
@@ -134,7 +134,7 @@ const Forum = () => {
         }
     };
 
-    // Update an existing comment
+    
     const updateComment = async (topicId) => {
         if (!editingCommentContent.trim()) return;
 
@@ -155,7 +155,7 @@ const Forum = () => {
         }
     };
 
-    // Delete a comment
+    
     const deleteComment = async (topicId, commentId) => {
         const confirmDelete = window.confirm("Are you sure you want to delete this comment?");
         if (!confirmDelete) return;
@@ -172,7 +172,7 @@ const Forum = () => {
         }
     };
 
-    // Handle topic selection
+    
     const handleTopicChange = (e) => {
         const topicId = e.target.value;
         setSelectedTopicId(topicId);
@@ -185,16 +185,16 @@ const Forum = () => {
         }
     };
 
-    // Start editing a topic
+    
     const handleEditClick = (topic) => {
         setEditingTopic(topic);
         setNewTopic({ title: topic.title, description: topic.description });
     };
 
-    // Format the timestamp to a readable string
+    
     const formatTimestamp = (timestamp) => {
         const date = new Date(timestamp);
-        return date.toLocaleString(); // Formats the timestamp as a readable date and time
+        return date.toLocaleString(); 
     };
 
     return (
@@ -274,8 +274,8 @@ const Forum = () => {
                                             {/* Conditional rendering for Edit/Delete buttons */}
                                             {currentUser?.username === topics.find(topic => topic._id === selectedTopicId).createdBy && (
                                                 <>
-                                                    <button onClick={() => deleteTopic(selectedTopicId)} className="topic-button delete">Delete Topic</button>
                                                     <button onClick={() => handleEditClick(topics.find(topic => topic._id === selectedTopicId))} className="topic-button edit">Edit Topic</button>
+                                                    <button onClick={() => deleteTopic(selectedTopicId)} className="topic-button delete">Delete Topic</button>
                                                 </>
                                             )}
                                         </>
@@ -285,53 +285,58 @@ const Forum = () => {
                         </div>
                     )}
 
-                    {selectedTopicId && (
-                        <>
-                            <h3 className="comments-title">Comments</h3>
-                            <div className="comment-form">
-                                <textarea
-                                    placeholder="Add a comment..."
-                                    value={newComment}
-                                    onChange={(e) => setNewComment(e.target.value)}
-                                    className="comment-textarea"
-                                />
-                                <button onClick={() => createComment(selectedTopicId)} className="comment-button">Post Comment</button>
+{selectedTopicId && (
+    <>
+        <h3 className="comments-title">Comments</h3>
+        <div className="comments-list">
+            {comments[selectedTopicId]?.map(comment => (
+                <div key={comment._id} className="comment">
+                    {/* When Editing */}
+                    {editingCommentId === comment._id ? (
+                        <div className="edit-comment-form">
+                           <textarea
+    value={editingCommentContent}
+    onChange={(e) => setEditingCommentContent(e.target.value)}
+    placeholder="Editing comment..."  
+    className="comment-textarea"
+/>
+                            <button onClick={() => updateComment(selectedTopicId)} className="comment-button">Update</button>
+                            <button onClick={() => setEditingCommentId(null)} className="comment-button cancel">Cancel</button>
+                        </div>
+                    ) : (
+                        <div className="comment">
+                            {/* Combine Author and Timestamp into one placeholder */}
+                            <div className="comment-author-timestamp">
+                                <span className="comment-placeholder">{`${comment.username} (${formatTimestamp(comment.createdAt)})`}</span>
                             </div>
-                            <div className="comments-list">
-                                {comments[selectedTopicId]?.map(comment => (
-                                    <div key={comment._id} className="comment">
-                                        <div className="comment-author">{comment.username}</div>
-                                        {editingCommentId === comment._id ? (
-                                            <div className="edit-comment-form">
-                                                <textarea
-                                                    value={editingCommentContent}
-                                                    onChange={(e) => setEditingCommentContent(e.target.value)}
-                                                    className="comment-textarea"
-                                                />
-                                                <button onClick={() => updateComment(selectedTopicId)} className="comment-button">Update</button>
-                                                <button onClick={() => setEditingCommentId(null)} className="comment-button cancel">Cancel</button>
-                                            </div>
-                                        ) : (
-                                            <>
-                                                <div className="comment-content">{comment.content}</div>
-                                                <div className="comment-timestamp">{formatTimestamp(comment.createdAt)}</div> {/* Timestamp */}
-                                            </>
-                                        )}
-                                        <div className="comment-actions">
-                                            {/* Conditional rendering for Edit/Delete buttons */}
-                                            {currentUser?.username === comment.username && (
-                                                <>
-                                                    <button onClick={() => {
-                                                        setEditingCommentId(comment._id);
-                                                        setEditingCommentContent(comment.content);
-                                                    }} className="comment-button edit">Edit</button>
-                                                    <button onClick={() => deleteComment(selectedTopicId, comment._id)} className="comment-button delete">Delete</button>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                            <div className="comment-content">{comment.content}</div>
+                            {/* Edit/Delete buttons for the comment owner */}
+                            {currentUser?.username === comment.username && (
+                                <div className="comment-actions">
+                                    <button onClick={() => {
+                                        setEditingCommentId(comment._id);
+                                        setEditingCommentContent(comment.content);
+                                    }} className="comment-button edit">Edit</button>
+                                    <button onClick={() => deleteComment(selectedTopicId, comment._id)} className="comment-button delete">Delete</button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            ))}
+        </div>
+
+        {/* New Comment Form */}
+        <div className="comment-form">
+        <textarea
+    placeholder="Add a comment..."  
+    value={newComment}
+    onChange={(e) => setNewComment(e.target.value)}
+    className="comment-textarea"
+/>
+            <button onClick={() => createComment(selectedTopicId)} className="comment-button">Post Comment</button>
+        </div>
+
                         </>
                     )}
                 </>
