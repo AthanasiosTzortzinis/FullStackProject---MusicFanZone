@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import ReactPlayer from 'react-player';
 import '../Style/TrackVideoManager.css';
@@ -6,8 +6,10 @@ import '../Style/TrackVideoManager.css';
 const TrackVideoManager = ({ playlists, selectedPlaylist, setSelectedPlaylist, setPlaylists, token }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
-    const [playingTrackId, setPlayingTrackId] = useState(null); // Track currently being listened to
-    const [error, setError] = useState(null); // State for error messages
+    const [playingTrackIndex, setPlayingTrackIndex] = useState(null);
+    const [error, setError] = useState(null); 
+    const [trackAddedMessage, setTrackAddedMessage] = useState(''); // <-- Add state for the "Track added" message
+    const playerRef = useRef(null); 
 
     const axiosInstance = axios.create({
         baseURL: 'http://localhost:4000',
@@ -23,10 +25,10 @@ const TrackVideoManager = ({ playlists, selectedPlaylist, setSelectedPlaylist, s
             });
 
             setSearchResults(response.data);
-            setError(null); // Clear error on successful search
+            setError(null); 
         } catch (error) {
             console.error('Error searching tracks:', error);
-            setError('Error fetching search results. Please try again.'); // Set error message
+            setError('Error fetching search results. Please try again.'); 
         }
     };
 
@@ -47,9 +49,18 @@ const TrackVideoManager = ({ playlists, selectedPlaylist, setSelectedPlaylist, s
                 return playlist;
             });
             setPlaylists(updatedPlaylists);
+
+            // Display the "Track added" message
+            setTrackAddedMessage('Track added!'); // <-- Set the message when the track is added
+
+            // Hide the message after 3 seconds
+            setTimeout(() => {
+                setTrackAddedMessage('');
+            }, 3000);
+        
         } catch (error) {
             console.error('Error adding track to playlist:', error);
-            setError('Error adding track to playlist. Please try again.'); // Set error message
+            setError('Error adding track to playlist. Please try again.'); 
         }
     };
 
@@ -78,9 +89,28 @@ const TrackVideoManager = ({ playlists, selectedPlaylist, setSelectedPlaylist, s
         }
     };
 
-    const toggleListenTrack = (trackId) => {
-        setPlayingTrackId((prevTrackId) => (prevTrackId === trackId ? null : trackId)); // Toggle track playback
+    const toggleListenTrack = (index) => {
+        setPlayingTrackIndex((prevIndex) => (prevIndex === index ? null : index)); 
     };
+
+    const handleVideoEnd = () => {
+       
+        const nextTrackIndex = playingTrackIndex + 1;
+        const playlistTracks = playlists.find((p) => p._id === selectedPlaylist)?.tracks;
+
+        if (playlistTracks && nextTrackIndex < playlistTracks.length) {
+            setPlayingTrackIndex(nextTrackIndex);
+        } else {
+            setPlayingTrackIndex(null); 
+        }
+    };
+
+    useEffect(() => {
+        if (playingTrackIndex !== null) {
+           
+            playerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, [playingTrackIndex]); 
 
     return (
       <div className="TrackVideoManager">
@@ -100,13 +130,16 @@ const TrackVideoManager = ({ playlists, selectedPlaylist, setSelectedPlaylist, s
                   onChange={(e) => {
                       setSearchQuery(e.target.value);
                       if (!e.target.value) {
-                          setSearchResults([]); // Clear results when the search bar is empty
+                          setSearchResults([]); 
                       }
                   }}
                   placeholder="Search for tracks..."
               />
               <button className="search-button" onClick={handleSearchTracks}>Search</button>
           </div>
+
+          {/* Display the track added message if it's not an empty string */}
+          {trackAddedMessage && <p className="track-added-message">{trackAddedMessage}</p>}
   
           {!selectedPlaylist && (
               <p>Please select a playlist.</p>
@@ -132,13 +165,13 @@ const TrackVideoManager = ({ playlists, selectedPlaylist, setSelectedPlaylist, s
               <div className="TracksInPlaylist">
                   <h2>Tracks in Playlist</h2>
                   <ul>
-                      {playlists.find((p) => p._id === selectedPlaylist)?.tracks?.map((track) => (
+                      {playlists.find((p) => p._id === selectedPlaylist)?.tracks?.map((track, index) => (
                           <li key={track.trackId}>
                               <a href={`https://www.youtube.com/watch?v=${track.trackId}`} target="_blank" rel="noopener noreferrer">
                                   {track.title}
                               </a>
-                              <button onClick={() => toggleListenTrack(track.trackId)}>
-                                  {playingTrackId === track.trackId ? 'Hide' : 'Listen / View'}
+                              <button onClick={() => toggleListenTrack(index)}>
+                                  {playingTrackIndex === index ? 'Hide' : 'Listen / View'}
                               </button>
                               <button onClick={() => handleDeleteTrackFromPlaylist(track.trackId)}>Delete</button>
                           </li>
@@ -148,15 +181,16 @@ const TrackVideoManager = ({ playlists, selectedPlaylist, setSelectedPlaylist, s
           )}
   
           {/* Render ReactPlayer if a track is being played */}
-          {playingTrackId && (
-              <div style={{ marginTop: '20px', width: '100%', maxWidth: '800px' }}>
+          {playingTrackIndex !== null && selectedPlaylist && (
+              <div ref={playerRef} style={{ marginTop: '20px', width: '100%', maxWidth: '800px' }}>
                   <ReactPlayer
-                      url={`https://www.youtube.com/watch?v=${playingTrackId}`}
-                      playing={true} // Automatically play the track
-                      controls={true} // Show player controls
-                      width="100%" // Full width
-                      height="450px" // Set height for larger size
-                      style={{ borderRadius: '8px' }} // Optional: add some border-radius for styling
+                      url={`https://www.youtube.com/watch?v=${playlists.find((p) => p._id === selectedPlaylist)?.tracks[playingTrackIndex].trackId}`}
+                      playing={true} 
+                      controls={true} 
+                      width="100%" 
+                      height="450px" 
+                      style={{ borderRadius: '8px' }} 
+                      onEnded={handleVideoEnd} 
                   />
               </div>
           )}

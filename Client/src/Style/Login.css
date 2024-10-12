@@ -7,6 +7,7 @@
     min-height: 100vh;
     padding: 20px;
     padding-top: 20px; 
+    background-color: #dcd5d4;
 }
 
 .login-container h2 {
@@ -94,21 +95,16 @@ p[style*="red"] {
 
 
 .registration-prompt {
-    margin-top: 15px; /* Adds space above the link */
-    margin-bottom: 10px; /* Optional: space below the message */
+    margin-top: 15px; 
+    margin-bottom: 10px; 
 }
 
 .register-link {
     font-weight: bold; 
-    color: #2979ce; /* Link color */
-    text-decoration: underline; /* Underline the link */
-    margin-left: 15px; /* Space between the text and the link */
+    color: #2979ce; 
+    text-decoration: underline; 
+    margin-left: 15px; 
 }
-
-
-
-
-
 
 
 @media (max-width: 600px) {

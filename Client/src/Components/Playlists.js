@@ -115,6 +115,7 @@ const Playlists = () => {
       {error && <p className="error-message">{error}</p>}
 
       <h2>Your Playlists</h2>
+      
       <div className="playlists-list">
         <ul>
           {playlists.map((playlist) => (
