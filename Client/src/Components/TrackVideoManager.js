@@ -66,9 +66,9 @@ const TrackVideoManager = ({ playlists, selectedPlaylist, setSelectedPlaylist, s
 
     const handleDeleteTrackFromPlaylist = async (trackId) => {
         if (!selectedPlaylist) return;
-
+    
         const confirmed = window.confirm('Are you sure you want to delete this track from the playlist?');
-
+    
         if (confirmed) {
             try {
                 await axiosInstance.delete(`/playlists/${selectedPlaylist}/tracks/${trackId}`);
@@ -82,12 +82,19 @@ const TrackVideoManager = ({ playlists, selectedPlaylist, setSelectedPlaylist, s
                     return playlist;
                 });
                 setPlaylists(updatedPlaylists);
+    
+                const playlistTracks = updatedPlaylists.find((p) => p._id === selectedPlaylist)?.tracks;
+                if (playingTrackIndex !== null && (!playlistTracks || !playlistTracks[playingTrackIndex])) {
+                    setPlayingTrackIndex(null); 
+                }
+    
             } catch (error) {
                 console.error('Error deleting track from playlist:', error);
                 setError('Error deleting track from playlist. Please try again.');
             }
         }
     };
+    
 
     const toggleListenTrack = (index) => {
         setPlayingTrackIndex((prevIndex) => (prevIndex === index ? null : index)); 
