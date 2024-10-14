@@ -8,7 +8,7 @@ const TrackVideoManager = ({ playlists, selectedPlaylist, setSelectedPlaylist, s
     const [searchResults, setSearchResults] = useState([]);
     const [playingTrackIndex, setPlayingTrackIndex] = useState(null);
     const [error, setError] = useState(null); 
-    const [trackAddedMessage, setTrackAddedMessage] = useState(''); // <-- Add state for the "Track added" message
+    const [trackAddedMessage, setTrackAddedMessage] = useState(''); 
     const playerRef = useRef(null); 
 
     const axiosInstance = axios.create({
@@ -50,10 +50,10 @@ const TrackVideoManager = ({ playlists, selectedPlaylist, setSelectedPlaylist, s
             });
             setPlaylists(updatedPlaylists);
 
-            // Display the "Track added" message
-            setTrackAddedMessage('Track added!'); // <-- Set the message when the track is added
+            
+            setTrackAddedMessage('Track added!'); 
 
-            // Hide the message after 3 seconds
+            
             setTimeout(() => {
                 setTrackAddedMessage('');
             }, 3000);
