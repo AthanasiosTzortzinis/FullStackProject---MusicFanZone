@@ -357,20 +357,97 @@ body {
     font-size: 21px;
 }
 
-@media (max-width: 600px) {
+
+@media (max-width: 768px) {
+    .forum-container {
+        max-width: 100%;
+        padding: 15px;
+    }
+
+    .forum-title, .create-topic-title, .choose-topic-title, .comments-title {
+        font-size: 1.5rem;
+    }
+
+    .topic-input, .topic-textarea, .topic-select {
+        width: 100%;
+    }
+
+    .topic-button {
+        width: 100%;
+        font-size: 1rem;
+    }
+
+    .topic-details h3 {
+        font-size: 1.5rem;
+    }
+
+    .topic-details p {
+        font-size: 1rem;
+    }
+
+    .comment-textarea {
+        max-width: 100%;
+    }
+
+    .comment-content {
+        font-size: 1rem;
+    }
+
+    .comment-author-timestamp {
+        font-size: 0.875rem;
+    }
+
+    .comment-button {
+        width: 100%;
+    }
+}
+
+
+@media (max-width: 480px) {
     .forum-container {
         padding: 10px;
     }
 
-    .topic-input,
-    .topic-textarea,
-    .topic-button,
-    .topic-select {
-        width: 100%; 
+    .forum-title, .create-topic-title, .choose-topic-title, .comments-title {
+        font-size: 1.25rem;
     }
 
-    .topic-button,
+    .topic-input, .topic-textarea, .topic-select {
+        width: 100%;
+        font-size: 0.875rem;
+        padding: 8px;
+    }
+
+    .topic-button {
+        width: 100%;
+        padding: 8px;
+        font-size: 0.875rem;
+    }
+
+    .topic-details h3 {
+        font-size: 1.3rem;
+    }
+
+    .topic-details p {
+        font-size: 0.9rem;
+    }
+
+    .comment-textarea {
+        padding: 8px;
+        font-size: 0.875rem;
+    }
+
+    .comment-content {
+        font-size: 0.9rem;
+    }
+
+    .comment-author-timestamp {
+        font-size: 0.75rem;
+    }
+
     .comment-button {
+        width: 100%;
+        padding: 8px;
         font-size: 0.875rem;
     }
 }
