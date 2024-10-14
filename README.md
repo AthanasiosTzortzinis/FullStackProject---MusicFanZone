@@ -13,8 +13,8 @@ Features
 - **Listen to Music Videos**: Easily play music videos directly from the application, providing a seamless experience to enjoy music without navigating away from the platform.
 
 Technologies Used
-- **Frontend**: React
 - **Backend**: Node.js, Express
+- **Frontend**: React
 - **Database**: MongoDB
 - **APIs**: YouTube API
 - **CSS**: Custom CSS for styling the application
@@ -43,5 +43,9 @@ Technologies Used
     - `react-player`: For embedding YouTube videos.
     - `react-router-dom`: For routing within the app.
     - `react-scripts`: For scripts and configuration used by Create React App.
-    - `react-youtube`: For easier integration with YouTube.
+
+- **Responsive Design**
+  To enhance usability across devices, media queries have been integrated into MusicFanZone, allowing the layout and features to adapt fluidly to different 
+  screen sizes. This approach ensures an optimal user experience by providing a mobile-friendly design that maintains functionality and aesthetics, regardless of the 
+  device being used.
   
