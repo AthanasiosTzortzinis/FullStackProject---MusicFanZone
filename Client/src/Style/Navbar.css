@@ -91,3 +91,48 @@ body, html {
 .logout-button:hover {
     background-color: #c82333;
 }
+
+
+/* Mobile styles for screens smaller than 768px */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction:column;
+        padding: 100px; 
+    }
+
+    .navbar-logo {
+        font-size: 1.5rem; 
+        margin-left: 0; 
+        text-align: center; 
+    }
+
+    .navbar-list {
+        flex-direction:inherit; 
+        align-items: center; 
+        margin: 3px 0; 
+        margin-left: 3px;
+    }
+
+    .navbar-link {
+        font-size: 1.2rem; 
+        margin: 4px 0; 
+        padding: 8px; 
+        margin-right: -5px;
+    }
+
+    .logout-button {
+        margin: 10px 0; 
+        width: 100%; 
+    }
+}
+
+
+@media (max-width: 480px) {
+    .welcome-message-new {
+        font-size: 1.5rem; 
+    }
+
+    .navbar {
+        padding: 4px; 
+    }
+}

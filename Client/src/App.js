@@ -6,6 +6,7 @@ import Forum from './Components/Forum';
 import Register from './Components/Register.js';
 import Login from './Components/Login';
 import Home from './Components/Home';
+import HelpCenter from './Components/HelpCenter'; 
 import '../src/Style/App.css';
 
 const LoginRequiredMessage = ({ redirectPath, additionalMessage, setRedirectPath }) => (
@@ -83,6 +84,9 @@ function App() {
           } 
         />
         <Route path="/register" element={<Register />} />
+
+        {/* Add Help Center Route */}
+        <Route path="/help" element={<HelpCenter />} />
       </Routes>
 
       {/* Display Login Message */}

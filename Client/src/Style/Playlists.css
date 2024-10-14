@@ -23,20 +23,20 @@ h1 {
 
 .create-playlist input {
     padding: 12px; 
-    border: 1px solid #0a131c; 
+    border: 1px solid #2d2f31; 
     border-radius: 5px;
     width: 270px; 
     margin-right: 10px;
     box-shadow: 0 2px 5px rgba(0, 123, 255, 0.1); 
     box-sizing: border-box; 
     height: 50px; 
-    background-color: #e1e9ee;
+    background-color: #efd1d1;
 }
 
 .create-playlist button {
     padding: 0 20px; 
     height: 49px; 
-    background-color: #4d7197; 
+    background-color:  #007bff; 
     color: #fff;
     border: none;
     border-radius: 5px;
@@ -152,3 +152,81 @@ h1 {
 .cancel-button:hover {
     background-color: #e0a800; 
 }
+
+
+@media (max-width: 768px) {
+    .playlists-container {
+        padding: 20px; 
+    }
+
+    .create-playlist {
+        justify-content: center; 
+    }
+
+    .create-playlist input {
+        width: 70%; 
+        margin-right: 5px; 
+        margin-bottom: 10px; 
+        padding-left: 10px; 
+    }
+
+    .create-playlist button {
+        width: 25%; 
+        margin-top: 0; 
+        padding: 0 10px; 
+    }
+
+    h1 {
+        font-size: 2rem; 
+    }
+
+    .playlist-item {
+        width: 50%; 
+        padding: 15px;
+    }
+
+    .editing-input {
+        width: 50%; 
+    }
+
+    .edit-button,
+    .delete-button,
+    .cancel-button {
+        width: auto; 
+    }
+}
+
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.5rem; 
+    }
+
+    .create-playlist input {
+        width: 60%; 
+        height: 40px; 
+        padding-left: 8px; 
+    }
+
+    .create-playlist button {
+        width: 30%;
+        height: 40px; 
+        padding: 0 8px; 
+    }
+
+    .playlist-item {
+        flex-direction: column; 
+        padding: 4px; 
+    }
+
+    .playlist-name {
+        font-size: 1rem;
+    }
+
+    .editing-input {
+        width: 40%; 
+        margin-bottom: 10px; 
+    }
+}
+
+

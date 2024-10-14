@@ -63,3 +63,52 @@
     line-height: 1.6;
     margin-top: 20px;
 }
+
+@media (max-width: 768px) {
+    .home-container {
+        padding: 10px; 
+        height: auto; 
+        background-size: 20%; 
+    }
+
+    .welcome-message {
+        font-size: 1.8rem; 
+    }
+
+    .about-text {
+        font-size: 1rem; 
+        margin-top: 15px; 
+    }
+
+    .home-container::after {
+        width: 10%; 
+        height: 100px; 
+        margin: 20px auto; 
+        opacity: 1; 
+    }
+}
+
+
+@media (max-width: 480px) {
+    .home-container {
+        padding: 5px; 
+        background-size:20%; 
+    }
+
+    .welcome-message {
+        font-size: 1.5rem; 
+    }
+
+    .about-text {
+        font-size: 0.9rem; 
+        margin-top: 10px; 
+    }
+
+    .home-container::after {
+        width: 20%; 
+        height: -10px; 
+        margin: 180px auto; 
+        opacity: 1; 
+    }
+}
+

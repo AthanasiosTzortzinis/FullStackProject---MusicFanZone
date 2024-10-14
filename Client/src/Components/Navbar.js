@@ -1,18 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
-import '../Style/Navbar.css'; 
+import '../Style/Navbar.css';
 
 const Navbar = ({ isLoggedIn, handleLogout }) => {
   const token = localStorage.getItem("token");
   let decodedToken;
   let username = "";
 
-  
   if (token) {
     try {
       decodedToken = jwtDecode(token);
-      username = decodedToken.username; 
+      username = decodedToken.username;
     } catch (error) {
       console.error("Token decoding error:", error);
     }
@@ -20,13 +19,11 @@ const Navbar = ({ isLoggedIn, handleLogout }) => {
 
   return (
     <div className="navbar">
-      {/* Logo for Music Fan Zone */}
       <div className="navbar-logo">Music Fan Zone</div>
 
       <div className="welcome-container">
-        {/* Show welcome message when user is logged in */}
         {isLoggedIn && username && (
-          <h3 className="welcome-message-new"> {/* Updated class name */}
+          <h3 className="welcome-message-new">
             Welcome, {username}!
           </h3>
         )}
@@ -37,6 +34,7 @@ const Navbar = ({ isLoggedIn, handleLogout }) => {
           <li><Link className="navbar-link" to="/">Home</Link></li>
           <li><Link className="navbar-link" to="/playlists">Playlists</Link></li>
           <li><Link className="navbar-link" to="/forum">Forum</Link></li>
+          <li><Link className="navbar-link" to="/help">Info</Link></li> {/* Add Help link */}
           {!isLoggedIn ? (
             <>
               <li><Link className="navbar-link" to="/register">Register</Link></li>
