@@ -56,7 +56,7 @@ const TrackVideoManager = ({ playlists, selectedPlaylist, setSelectedPlaylist, s
             
             setTimeout(() => {
                 setTrackAddedMessage('');
-            }, 3000);
+            }, 2000);
         
         } catch (error) {
             console.error('Error adding track to playlist:', error);
@@ -162,7 +162,14 @@ const TrackVideoManager = ({ playlists, selectedPlaylist, setSelectedPlaylist, s
                       >
                           {track.snippet.title}
                       </a>
-                      <button className="add-to-playlist-button" onClick={() => handleAddTrackToPlaylist(track)}>Add to Playlist</button>
+                      <button 
+                      className="add-to-playlist-button" 
+                      style={{ backgroundColor:'blue', color: 'white' }} 
+                      onClick={() => handleAddTrackToPlaylist(track)}
+                     >
+                   Add to Playlist
+                    </button>
+
 
                   </li>
               ))}

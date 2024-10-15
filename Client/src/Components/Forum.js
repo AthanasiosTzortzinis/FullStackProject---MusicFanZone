@@ -242,28 +242,37 @@ const Forum = () => {
                             {topics.find(topic => topic._id === selectedTopicId) && (
                                 <>
                                     {editingTopic ? (
-                                        <>
-                                             <h4 className='edit-label'>Edit Topic</h4>
+    <>
+        <h4 className='edit-label'>Edit Topic</h4>
         <div className="edit-topic-form">
-            <label htmlFor="editTitle" className="edit-label">Title</label>
-            <input
-                id="editTitle"
-                value={newTopic.title}
-                onChange={(e) => setNewTopic({ ...newTopic, title: e.target.value })}
-                className="topic-input"
-            />
-            <label htmlFor="editDescription" className="edit-label">Description</label>
-            <textarea
-                id="editDescription"
-                value={newTopic.description}
-                onChange={(e) => setNewTopic({ ...newTopic, description: e.target.value })}
-                className="topic-textarea"
-                                                />
-                                            </div>
-                                            <div className="edit-actions">
-                                                <button onClick={createOrUpdateTopic} className="topic-button">Save Changes</button>
-                                                <button onClick={() => setEditingTopic(null)} className="topic-button cancel">Cancel</button>
-                                            </div>
+            {/* Title row */}
+            <div className="edit-topic-row">
+                <label htmlFor="editTitle" className="edit-label">Title</label>
+                <input
+                    id="editTitle"
+                    value={newTopic.title}
+                    onChange={(e) => setNewTopic({ ...newTopic, title: e.target.value })}
+                    className="edit-topic-input"
+                />
+            </div>
+
+            {/* Description row */}
+            <div className="edit-topic-row">
+                <label htmlFor="editDescription" className="edit-label">Description</label>
+                <textarea
+                    id="editDescription"
+                    value={newTopic.description}
+                    onChange={(e) => setNewTopic({ ...newTopic, description: e.target.value })}
+                    className="edit-topic-textarea"
+                />
+            </div>
+        </div>
+
+        {/* Buttons row */}
+        <div className="edit-actions">
+            <button onClick={createOrUpdateTopic} className="topic-button">Save Changes</button>
+            <button onClick={() => setEditingTopic(null)} className="topic-button cancel">Cancel</button>
+        </div>
                                         </>
                                     ) : (
                                         <>

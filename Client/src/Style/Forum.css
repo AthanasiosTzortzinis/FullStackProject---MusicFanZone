@@ -166,21 +166,41 @@ body {
 }
 
 .edit-topic-form {
-    width: 100%; 
-    max-width: 400px; 
-    margin: 0 auto; 
+    display: flex;
+    flex-direction: column;
+    max-width: 500px; 
+    margin: 0; 
+}
+
+.edit-topic-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; 
+    margin-bottom: 10px; 
 }
 
 .edit-label {
-    margin-top: 10px; 
-    text-align: center; 
+    width: 100px; 
+    margin-right: 10px; 
+    text-align: left; 
 }
 
-.edit-topic-form {
-    display: flex;
-    flex-direction: column; 
-    gap: 15px; 
+.edit-topic-input,
+.edit-topic-textarea {
+    flex-grow: 1;
+    width: 100%; 
 }
+
+.edit-topic-textarea {
+    min-height: 40px; 
+}
+
+.edit-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start; 
+}
+
 
 .input-wrapper {
     position: relative; 
