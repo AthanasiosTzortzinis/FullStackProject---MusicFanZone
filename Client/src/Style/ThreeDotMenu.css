@@ -1,0 +1,80 @@
+
+.topic-details {
+    position: relative; 
+    padding: 20px;     
+    border: 1px solid #ddd; 
+    background-color: #f9f9f9; 
+    margin-bottom: 20px; 
+}
+
+
+.three-dot-menu {
+    position: absolute;
+    top: 110px;  
+    right: 13px; 
+    cursor: pointer;
+    z-index: 1000; 
+}
+
+
+.three-dot-icon {
+    font-size: 20px;  
+    color: #333;      
+}
+
+
+.menu-options {
+    position: absolute;
+    top: 30px;       
+    right: 0;        
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    padding: 5px;
+    min-width: 100px;  
+    display: flex;
+    flex-direction: column;
+}
+
+
+.menu-option {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px; 
+    padding: 5px;
+    text-align: left;
+    outline: none;
+    width: 100%;
+}
+
+
+.menu-option:first-child {
+    color: blue; 
+}
+
+
+.menu-option:last-child {
+    color: red;  
+}
+
+
+.menu-option:hover {
+    background-color: #f0f0f0; 
+}
+
+.comment-actions {
+    position: absolute; 
+    top: -90px; 
+    right: -2px; 
+    transform: translateY(-50%); 
+    cursor: pointer;
+    z-index: 100; 
+}
+
+.three-dot-icon {
+    font-size: 20px; 
+    color: #333; 
+}
+

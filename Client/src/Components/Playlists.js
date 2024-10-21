@@ -129,7 +129,13 @@ const Playlists = () => {
                     className="editing-input"
                   />
                   <button onClick={handleEditPlaylist} className="edit-button">Update</button>
-                  <button onClick={handleCancelEdit} className="cancel-button">Cancel</button>
+                  <button 
+    onClick={handleCancelEdit} 
+    className="cancel-button" 
+    style={{ backgroundColor: '#007bff', color: 'white' }} // Inline styles for Cancel button
+>
+    Cancel
+</button>
                 </>
               ) : (
                 <>

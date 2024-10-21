@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../Style/Forum.css';
+import ThreeDotMenu from './ThreeDotMenu.js'; 
+
+
 
 const Forum = () => {
     const [topics, setTopics] = useState([]);
@@ -198,8 +201,10 @@ const Forum = () => {
     };
 
     return (
+        <>
+        <h2 className="forum-title">Join the Discussion!</h2>
         <div className="forum-container">
-            <h2 className="forum-title">Join the Discussion!</h2>
+            
             {error && <div className="error-message">{error}</div>}
 
             {currentUser && (
@@ -281,12 +286,14 @@ const Forum = () => {
                                             <p><strong>Created by:</strong> {topics.find(topic => topic._id === selectedTopicId).createdBy}</p>
                                             <p><strong>Created at:</strong> {formatTimestamp(topics.find(topic => topic._id === selectedTopicId).createdAt)}</p>
                                             {/* Conditional rendering for Edit/Delete buttons */}
-                                            {currentUser?.username === topics.find(topic => topic._id === selectedTopicId).createdBy && (
-                                                <>
-                                                    <button onClick={() => handleEditClick(topics.find(topic => topic._id === selectedTopicId))} className="topic-button edit">Edit Topic</button>
-                                                    <button onClick={() => deleteTopic(selectedTopicId)} className="topic-button delete">Delete Topic</button>
-                                                </>
-                                            )}
+                                            {currentUser?.username === topics.find(topic => topic._id === selectedTopicId)?.createdBy && (
+    <div className="three-dot-menu-container">
+        <ThreeDotMenu
+            onEdit={() => handleEditClick(topics.find(topic => topic._id === selectedTopicId))}
+            onDelete={() => deleteTopic(selectedTopicId)}
+        />
+    </div>
+)}
                                         </>
                                     )}
                                 </>
@@ -298,37 +305,39 @@ const Forum = () => {
     <>
         <h3 className="comments-title">Comments</h3>
         <div className="comments-list">
-            {comments[selectedTopicId]?.map(comment => (
-                <div key={comment._id} className="comment">
-                    {/* When Editing */}
-                    {editingCommentId === comment._id ? (
-                        <div className="edit-comment-form">
-                           <textarea
-    value={editingCommentContent}
-    onChange={(e) => setEditingCommentContent(e.target.value)}
-    placeholder="Editing comment..."  
-    className="comment-textarea"
-/>
-                            <button onClick={() => updateComment(selectedTopicId)} className="comment-button">Update</button>
-                            <button onClick={() => setEditingCommentId(null)} className="comment-button cancel">Cancel</button>
+    {comments[selectedTopicId]?.map(comment => (
+        <div key={comment._id} className="comment" style={{ position: 'relative' }}>
+            {/* When Editing */}
+            {editingCommentId === comment._id ? (
+                <div className="edit-comment-form">
+                    <textarea
+                        value={editingCommentContent}
+                        onChange={(e) => setEditingCommentContent(e.target.value)}
+                        placeholder="Editing comment..."
+                        className="comment-textarea"
+                    />
+                    <button onClick={() => updateComment(selectedTopicId)} className="comment-button">Update</button>
+                    <button onClick={() => setEditingCommentId(null)} className="comment-button cancel">Cancel</button>
+                </div>
+            ) : (
+                <div className="comment">
+                <div className="comment-author-timestamp">
+                    <span className="comment-author">{comment.username}</span>
+                    <span className="comment-timestamp">{`(${formatTimestamp(comment.createdAt)})`}</span>
+                </div>
+                    <div className="comment-content">{comment.content}</div>
+                    {/* Edit/Delete buttons for the comment owner */}
+                    {currentUser?.username === comment.username && (
+                        <div className="comment-actions">
+                            <ThreeDotMenu
+                                onEdit={() => {
+                                    setEditingCommentId(comment._id);
+                                    setEditingCommentContent(comment.content);
+                                }}
+                                onDelete={() => deleteComment(selectedTopicId, comment._id)}
+                            />
                         </div>
-                    ) : (
-                        <div className="comment">
-                            {/* Combine Author and Timestamp into one placeholder */}
-                            <div className="comment-author-timestamp">
-                                <span className="comment-placeholder">{`${comment.username} (${formatTimestamp(comment.createdAt)})`}</span>
-                            </div>
-                            <div className="comment-content">{comment.content}</div>
-                            {/* Edit/Delete buttons for the comment owner */}
-                            {currentUser?.username === comment.username && (
-                                <div className="comment-actions">
-                                    <button onClick={() => {
-                                        setEditingCommentId(comment._id);
-                                        setEditingCommentContent(comment.content);
-                                    }} className="comment-button edit">Edit</button>
-                                    <button onClick={() => deleteComment(selectedTopicId, comment._id)} className="comment-button delete">Delete</button>
-                                </div>
-                            )}
+                    )}
                         </div>
                     )}
                 </div>
@@ -351,6 +360,7 @@ const Forum = () => {
                 </>
             )}
         </div>
+        </>
     );
 };
 

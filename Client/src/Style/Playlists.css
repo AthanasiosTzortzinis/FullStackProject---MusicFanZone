@@ -5,15 +5,22 @@
     align-items: center;
     padding: 30px;
     min-height: 100vh;
-    font-family: 'Arial', sans-serif; 
     background-color: #dcd5d4;
 }
 
 
 h1 {
     color: #333;
-    font-size: 2.5rem;
-    margin-bottom: 20px;
+    font-size: 2rem;
+    margin-bottom: 50px;
+}
+
+h2 {
+    font-size: 1.7rem; /* Increased font size for 'Your Playlists' */
+    color: #333;
+    margin-bottom: 22px;
+    text-align: center;
+    margin-top: 10px;
 }
 
 .create-playlist {
@@ -80,7 +87,7 @@ h1 {
     border: 1px solid #161515; 
     border-radius: 5px; 
     margin: 0 auto 15px; 
-    width: 80%; 
+    width: 800%; 
     max-width: 500px; 
     transition: box-shadow 0.3s ease; 
 }
@@ -113,7 +120,7 @@ h1 {
 .cancel-button {
     padding: 4px 10px; 
     border: none;
-    border-radius: 5px;
+    border-radius: 50px;
     cursor: pointer;
     transition: background-color 0.3s ease;
     margin-left: 5px; 
@@ -136,8 +143,8 @@ h1 {
 
 .cancel-button {
     width: 80px; 
-    background-color: #ffc107; 
-    color: black;
+    background-color: #007bff; /* Changed to blue */
+    color: white;
 }
 
 
@@ -177,7 +184,7 @@ h1 {
     }
 
     h1 {
-        font-size: 2rem; 
+        font-size: 2.1rem; 
     }
 
     .playlist-item {
