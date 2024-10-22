@@ -9,7 +9,6 @@ const playlistRoutes = require('./routes/playlistRoutes');
 const trackRoutes = require('./routes/trackRoutes');
 const commentsRoutes = require('./routes/commentsRoutes');
 const userRoutes = require('./routes/user');
-//const topicRoutes = require('./routes/topicRoutes'); 
 const Comment = require('./models/Comment');
 const Topic = require('./models/Topic');
 
@@ -58,7 +57,7 @@ const authenticateUser =async  (req, res, next) => {
 app.use('/user', userRoutes);
 app.use('/playlists', playlistRoutes);
 app.use('/tracks', trackRoutes);
-//app.use('/api/topics', topicRoutes);
+
 
 
 const YOUTUBE_BASE_URL = 'https://www.googleapis.com/youtube/v3';

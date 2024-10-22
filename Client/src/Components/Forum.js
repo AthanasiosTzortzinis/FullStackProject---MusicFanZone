@@ -202,7 +202,7 @@ const Forum = () => {
 
     return (
         <>
-        <h2 className="forum-title">Join the Discussion!</h2>
+        <h2 className="forum-title">Join the Discussion</h2>
         <div className="forum-container">
             
             {error && <div className="error-message">{error}</div>}

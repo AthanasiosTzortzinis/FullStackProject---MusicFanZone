@@ -288,7 +288,7 @@ body {
 
 .comment-timestamp {
     color: rgb(88, 82, 82); 
-    font-size: 1rem; 
+    font-size: 1.2rem; 
     margin-left: 5px; 
 }
 
@@ -296,7 +296,7 @@ body {
 .comment-content {
     margin-bottom: 10px;
     font-size: 1.2rem; 
-    color: #a03232; 
+    color: #251616; 
 }
 
 .edit-comment-form {
